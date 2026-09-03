@@ -166,12 +166,11 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
       ref={internalContainerRef}
       className={`relative w-full aspect-[16/10] sm:aspect-[16/9] max-w-lg lg:max-w-xl mx-auto flex items-center justify-center select-none ${className}`}
     >
-      {/* Visual background container matching Haidar warm neutral design */}
-      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#FAF9F5] flex items-center justify-center">
-        {/* Scrubbing Video Element */}
+      {/* Seamless transparent character viewport */}
+      <div className="relative w-full h-full flex items-center justify-center">
+        {/* Scrubbing Video Element with WebM Alpha + MP4 Theme Fallback */}
         <video
           ref={videoRef}
-          src="/videos/character-scrub.mp4"
           poster="/videos/character-poster.webp"
           muted
           playsInline
@@ -181,17 +180,10 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
             isLoaded ? 'opacity-100' : 'opacity-90'
           }`}
           aria-hidden="true"
-        />
-
-        {/* Minimal interaction hint badge for desktop cursor */}
-        {!isTouchDevice && !prefersReducedMotion && (
-          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-60 hover:opacity-100">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-[#E5E2DA] text-[10px] font-mono text-[#75726B] shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              <span>Geser kursor untuk berinteraksi</span>
-            </span>
-          </div>
-        )}
+        >
+          <source src="/videos/character-scrub.webm" type="video/webm" />
+          <source src="/videos/character-scrub.mp4" type="video/mp4" />
+        </video>
       </div>
     </div>
   );
