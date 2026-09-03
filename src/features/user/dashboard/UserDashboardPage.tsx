@@ -4,7 +4,7 @@ import { useAppStore } from '../../../stores/appStore';
 import { getProducts, getStockChecks, getPriceHistory } from '../../../lib/db';
 import { getScheduledProductsForToday } from '../../../lib/inspectionSchedule';
 import type { Product, StockCheck, PriceHistory } from '../../../types/database.types';
-import { getCurrentDay, formatDate, getTodayDateString, getJakartaNow } from '../../../lib/datetime';
+import { getCurrentDay, formatDate, getTodayDateString, getJakartaNow, toJakartaDateString } from '../../../lib/datetime';
 import {
   ClipboardCheck,
   TrendingUp,
@@ -58,7 +58,7 @@ export const UserDashboardPage: React.FC = () => {
 
   // Today's Price changes (BR-U08..BR-U10) - Product name & direction only!
   const todayPriceChanges = priceHistories.filter(
-    (h) => h.created_at.slice(0, 10) === todayDateStr
+    (h) => toJakartaDateString(h.created_at) === todayDateStr
   );
 
   return (

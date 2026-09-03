@@ -127,23 +127,39 @@ export async function resetDatabase(): Promise<void> {
   await tx.done;
 }
 
+function isCurrentUserAdmin(): boolean {
+  try {
+    const raw = localStorage.getItem('haidar_active_user');
+    if (raw) {
+      const u = JSON.parse(raw);
+      return u?.role === 'ADMIN';
+    }
+  } catch {}
+  return false;
+}
+
 // ==========================================
 // PRODUCTS DATA ACCESS
 // ==========================================
 
-export async function getProducts(filters?: {
-  search?: string;
-  categoryId?: string;
-  unitId?: string;
-  stockStatus?: 'Semua' | 'Tersedia' | 'Menipis' | 'Habis';
-  includeInactive?: boolean;
-}): Promise<Product[]> {
+export async function getProducts(
+  filters?: {
+    search?: string;
+    categoryId?: string;
+    unitId?: string;
+    stockStatus?: 'Semua' | 'Tersedia' | 'Menipis' | 'Habis';
+    includeInactive?: boolean;
+  },
+  isAdmin?: boolean
+): Promise<Product[]> {
+  const isUserAdmin = isAdmin !== undefined ? isAdmin : isCurrentUserAdmin();
+
   // 1. Try Supabase remote fetch if online
   if (isRemoteReady()) {
     try {
       const remoteProducts = await supabaseGetProducts({
         includeInactive: filters?.includeInactive,
-        isAdmin: true,
+        isAdmin: isUserAdmin,
       });
 
       // Cache to IndexedDB
@@ -970,10 +986,12 @@ export async function rejectStockCheckEdit(
 // PRICE HISTORY & ACTIVITY LOGS
 // ==========================================
 
-export async function getPriceHistory(productId?: string): Promise<PriceHistory[]> {
+export async function getPriceHistory(productId?: string, isAdmin?: boolean): Promise<PriceHistory[]> {
+  const isUserAdmin = isAdmin !== undefined ? isAdmin : isCurrentUserAdmin();
+
   if (isRemoteReady()) {
     try {
-      const histories = await supabaseGetPriceHistory(productId);
+      const histories = await supabaseGetPriceHistory(productId, isUserAdmin);
       const db = await getDB();
       const tx = db.transaction('price_history', 'readwrite');
       for (const h of histories) {

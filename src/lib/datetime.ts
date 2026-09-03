@@ -79,6 +79,26 @@ export function getTodayDateString(): string {
 }
 
 /**
+ * Converts any ISO date string to Jakarta date string YYYY-MM-DD
+ */
+export function toJakartaDateString(isoDateString?: string): string {
+  if (!isoDateString) return '';
+  try {
+    const d = new Date(isoDateString);
+    if (isNaN(d.getTime())) return '';
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: APP_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    return formatter.format(d);
+  } catch {
+    return isoDateString.slice(0, 10);
+  }
+}
+
+/**
  * Current time string: HH:mm in Asia/Jakarta
  */
 export function getCurrentTime(): string {

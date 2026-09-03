@@ -36,10 +36,29 @@ export async function supabaseGetProducts(options?: {
       .select('*')
       .order('name', { ascending: true });
 
-    const { data, error } = await query;
+    if (!options?.includeInactive) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data: prods, error } = await query;
     if (error) throw error;
 
-    return (data || []).map((p: any) => ({
+    // Fetch inspection schedules (allowed for authenticated users)
+    const { data: schedules } = await supabase
+      .from('inspection_schedules')
+      .select('product_id, day_of_week');
+
+    const scheduleMap = new Map<string, DayOfWeek[]>();
+    if (schedules) {
+      for (const s of schedules) {
+        if (!scheduleMap.has(s.product_id)) {
+          scheduleMap.set(s.product_id, []);
+        }
+        scheduleMap.get(s.product_id)!.push(s.day_of_week as DayOfWeek);
+      }
+    }
+
+    return (prods || []).map((p: any) => ({
       id: p.id,
       sku: p.sku,
       name: p.name,
@@ -53,6 +72,7 @@ export async function supabaseGetProducts(options?: {
       minimum_stock: Number(p.minimum_stock),
       image_url: p.image_url,
       notes: p.notes,
+      inspection_days: scheduleMap.get(p.id) || [],
       is_active: p.is_active,
       created_at: p.created_at,
       updated_at: p.updated_at,
@@ -778,9 +798,40 @@ export async function supabaseReviewEditRequest(
 // 5. PRICE HISTORY & ACTIVITY LOGS
 // ==============================================================================
 
-export async function supabaseGetPriceHistory(productId?: string): Promise<PriceHistory[]> {
+export async function supabaseGetPriceHistory(productId?: string, isAdmin?: boolean): Promise<PriceHistory[]> {
   if (!isRemoteReady()) throw new Error('Supabase not ready');
 
+  // If staff/user, query safe view (no purchase_price)
+  if (!isAdmin) {
+    let query = supabase
+      .from('user_safe_price_changes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (productId) {
+      query = query.eq('product_id', productId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return (data || []).map((h: any) => ({
+      id: h.id,
+      product_id: h.product_id,
+      product_name: h.product_name,
+      version: h.version,
+      old_purchase_price: 0, // Zeroed out for staff safety
+      new_purchase_price: 0, // Zeroed out for staff safety
+      old_selling_price: Number(h.old_selling_price),
+      new_selling_price: Number(h.new_selling_price),
+      change_type: h.change_type as PriceChangeType,
+      reason: h.reason,
+      updated_by_name: 'Admin',
+      created_at: h.created_at,
+    }));
+  }
+
+  // Admin query
   let query = supabase
     .from('price_history')
     .select(`*, product:products(name)`)
