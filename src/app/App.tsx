@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './router';
+import { useAppStore } from '../stores/appStore';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,6 +15,22 @@ const queryClient = new QueryClient({
 });
 
 export const App: React.FC = () => {
+  const syncAuthSession = useAppStore((state) => state.syncAuthSession);
+
+  useEffect(() => {
+    syncAuthSession();
+
+    if (isSupabaseConfigured()) {
+      const { data: authListener } = supabase.auth.onAuthStateChange((_event, _session) => {
+        syncAuthSession();
+      });
+
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    }
+  }, [syncAuthSession]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

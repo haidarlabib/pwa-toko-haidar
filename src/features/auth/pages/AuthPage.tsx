@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Shield,
-  UserCheck,
   Lock,
   Mail,
   User,
@@ -14,15 +13,15 @@ import {
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, availableUsers } = useAppStore();
+  const { login, register } = useAppStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // Login form state
-  const [loginIdentifier, setLoginIdentifier] = useState('admin');
-  const [loginPassword, setLoginPassword] = useState('••••••••');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   // Register form state
   const [registerName, setRegisterName] = useState('');
@@ -45,7 +44,7 @@ export const AuthPage: React.FC = () => {
           navigate('/user/dashboard');
         }
       } else {
-        setErrorMessage(res.error || 'Autentikasi gagal. Silakan periksa kembali.');
+        setErrorMessage(res.error || 'Autentikasi gagal. Silakan periksa kembali email/username dan password.');
       }
     } finally {
       setLoading(false);
@@ -80,101 +79,87 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const handleQuickDemoLogin = async (username: string) => {
-    setLoginIdentifier(username);
-    setLoading(true);
-    const res = await login(username);
-    setLoading(false);
-    if (res.success && res.role) {
-      if (res.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/dashboard');
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#121214] antialiased flex flex-col justify-between selection:bg-[#EAE6DD] font-sans">
       {/* Top Header */}
       <header className="px-5 sm:px-10 py-5 flex items-center justify-between max-w-5xl w-full mx-auto">
         <button
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-1.5 text-xs text-[#75726B] hover:text-[#121214] font-mono transition-colors"
+          className="flex items-center gap-1.5 text-xs text-[#605D57] hover:text-[#121214] transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kembali</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali ke Beranda</span>
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#121214]" />
-          <span className="font-extrabold text-xs tracking-wider uppercase text-[#121214]">
-            Haidar Plastik
+          <div className="w-2 h-2 rounded-full bg-emerald-700" />
+          <span className="text-[11px] font-mono font-medium tracking-tight text-[#605D57]">
+            Sistem Haidar Plastik
           </span>
         </div>
       </header>
 
-      {/* Main Authentication Card */}
+      {/* Main Container */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md bg-white rounded-xl border border-[#E5E2DA] p-6 sm:p-8 shadow-xs space-y-6">
-          {/* Card Title & Mode Toggle */}
-          <div className="space-y-4 text-center">
-            <div>
-              <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase">
-                Autentikasi Akses
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-[#121214] tracking-tight mt-0.5">
-                {mode === 'login' ? 'Masuk ke Sistem' : 'Daftar Akun Staf'}
-              </h2>
-            </div>
-
-            {/* Mode Switcher Tabs */}
-            <div className="grid grid-cols-2 p-1 bg-[#F5F4EE] rounded-lg border border-[#E5E2DA]">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('login');
-                  setErrorMessage('');
-                }}
-                className={`py-1.5 text-xs font-semibold rounded-md transition-all ${
-                  mode === 'login'
-                    ? 'bg-white text-[#121214] shadow-2xs'
-                    : 'text-[#75726B] hover:text-[#121214]'
-                }`}
-              >
-                Masuk (Login)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('register');
-                  setErrorMessage('');
-                }}
-                className={`py-1.5 text-xs font-semibold rounded-md transition-all ${
-                  mode === 'register'
-                    ? 'bg-white text-[#121214] shadow-2xs'
-                    : 'text-[#75726B] hover:text-[#121214]'
-                }`}
-              >
-                Daftar (Register)
-              </button>
-            </div>
+        <div className="w-full max-w-md bg-white border border-[#E5E2DA] rounded-xl shadow-xs p-6 sm:p-8 space-y-6">
+          {/* Header Title */}
+          <div className="space-y-1 text-center">
+            <h1 className="text-xl font-bold tracking-tight text-[#121214]">
+              {mode === 'login' ? 'Masuk ke Akun Anda' : 'Registrasi Staf Baru'}
+            </h1>
+            <p className="text-xs text-[#75726B]">
+              {mode === 'login'
+                ? 'Gunakan akun yang telah terdaftar pada sistem.'
+                : 'Daftarkan identitas staf untuk mengakses operasional toko.'}
+            </p>
           </div>
 
-          {/* Error Message Box */}
+          {/* Mode Switcher Tabs */}
+          <div className="grid grid-cols-2 p-1 bg-[#F0EFE9] rounded-lg border border-[#E5E2DA] text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setErrorMessage('');
+              }}
+              className={`py-1.5 rounded-md transition-all ${
+                mode === 'login'
+                  ? 'bg-white text-[#121214] shadow-2xs'
+                  : 'text-[#75726B] hover:text-[#121214]'
+              }`}
+            >
+              Masuk (Login)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setErrorMessage('');
+              }}
+              className={`py-1.5 rounded-md transition-all ${
+                mode === 'register'
+                  ? 'bg-white text-[#121214] shadow-2xs'
+                  : 'text-[#75726B] hover:text-[#121214]'
+              }`}
+            >
+              Daftar Staf
+            </button>
+          </div>
+
+          {/* Error Notice */}
           {errorMessage && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
-              <span>{errorMessage}</span>
+            <div className="p-3 bg-red-50/80 border border-red-200 rounded-lg flex items-start gap-2.5 text-xs text-red-700">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <span className="leading-snug">{errorMessage}</span>
             </div>
           )}
 
           {/* LOGIN FORM */}
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-[#33312E] block">
-                  Username atau Email
+                  Email atau Username
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-[#85827B] absolute left-3 top-2.5" />
@@ -183,20 +168,17 @@ export const AuthPage: React.FC = () => {
                     required
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="admin atau ahmad"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all"
+                    placeholder="email@haidar.com atau username"
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[#33312E]">
                     Password
                   </label>
-                  <span className="text-[10px] text-[#85827B] font-mono">
-                    Default demo
-                  </span>
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-[#85827B] absolute left-3 top-2.5" />
@@ -315,36 +297,11 @@ export const AuthPage: React.FC = () => {
             </form>
           )}
 
-          {/* Quick Demo Switcher Section */}
-          <div className="pt-4 border-t border-[#EAE8E2] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase text-[#75726B] tracking-wider">
-                Akun Demo:
-              </span>
-              <span className="text-[10px] text-[#85827B] font-mono">1-Klik Masuk</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {availableUsers.slice(0, 3).map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => handleQuickDemoLogin(user.username)}
-                  className="p-2 rounded-md border border-[#E5E2DA] bg-[#FAF9F5] hover:bg-[#F0EFE9] text-left transition-all"
-                >
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-[#121214] truncate">
-                    {user.role === 'ADMIN' ? (
-                      <Shield className="w-3 h-3 text-indigo-600 shrink-0" />
-                    ) : (
-                      <UserCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                    )}
-                    <span className="truncate">{user.name}</span>
-                  </div>
-                  <span className="text-[9px] font-mono text-[#75726B] block truncate">
-                    @{user.username} ({user.role})
-                  </span>
-                </button>
-              ))}
+          {/* Security badge note */}
+          <div className="pt-3 border-t border-[#EAE8E2] text-center">
+            <div className="inline-flex items-center gap-1.5 text-[10px] text-[#75726B] font-mono">
+              <Shield className="w-3 h-3 text-emerald-700" />
+              <span>Otorisasi Terproteksi Row Level Security (RLS)</span>
             </div>
           </div>
         </div>
