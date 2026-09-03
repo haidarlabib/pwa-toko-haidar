@@ -281,7 +281,75 @@ export async function supabaseUpdateProductPrice(
 ): Promise<{ product: Product; priceHistory: PriceHistory }> {
   if (!isRemoteReady()) throw new Error('Supabase not ready');
 
-  // Fetch current product
+  // 1. Try atomic RPC procedure
+  try {
+    const { data: rpcRes, error: rpcErr } = await supabase.rpc('update_official_price', {
+      p_product_id: id,
+      p_new_purchase_price: Number(input.new_purchase_price),
+      p_new_selling_price: Number(input.new_selling_price),
+      p_reason: input.reason.trim(),
+    });
+
+    if (!rpcErr && rpcRes?.success) {
+      const { data: prodData } = await supabase
+        .from('products')
+        .select(`*, category:categories(*), unit:units(*)`)
+        .eq('id', id)
+        .single();
+
+      const { data: histData } = await supabase
+        .from('price_history')
+        .select('*')
+        .eq('product_id', id)
+        .order('version', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (prodData && histData) {
+        return {
+          product: {
+            id: prodData.id,
+            sku: prodData.sku,
+            name: prodData.name,
+            category_id: prodData.category_id,
+            subcategory: prodData.subcategory,
+            unit_id: prodData.unit_id,
+            purchase_price: Number(prodData.purchase_price),
+            selling_price: Number(prodData.selling_price),
+            current_price_version: prodData.price_version,
+            stock: Number(prodData.stock),
+            minimum_stock: Number(prodData.minimum_stock),
+            image_url: prodData.image_url,
+            notes: prodData.notes,
+            inspection_days: [],
+            is_active: prodData.is_active,
+            created_at: prodData.created_at,
+            updated_at: prodData.updated_at,
+            category: prodData.category,
+            unit: prodData.unit,
+          },
+          priceHistory: {
+            id: histData.id,
+            product_id: histData.product_id,
+            product_name: prodData.name,
+            version: histData.version,
+            old_purchase_price: Number(histData.old_purchase_price),
+            new_purchase_price: Number(histData.new_purchase_price),
+            old_selling_price: Number(histData.old_selling_price),
+            new_selling_price: Number(histData.new_selling_price),
+            change_type: histData.change_type as PriceChangeType,
+            reason: histData.reason,
+            updated_by_name: histData.updated_by_name,
+            created_at: histData.created_at,
+          },
+        };
+      }
+    }
+  } catch (rpcEx) {
+    console.warn('RPC update_official_price fallback to direct query:', rpcEx);
+  }
+
+  // 2. Direct fallback
   const { data: current, error: getErr } = await supabase
     .from('products')
     .select('*')
@@ -350,43 +418,43 @@ export async function supabaseUpdateProductPrice(
     },
   });
 
-  const priceHistory: PriceHistory = {
-    id: historyData.id,
-    product_id: id,
-    product_name: updatedProd.name,
-    version: nextVersion,
-    old_purchase_price: oldPurchase,
-    new_purchase_price: newPurchase,
-    old_selling_price: oldSelling,
-    new_selling_price: newSelling,
-    change_type: changeType,
-    reason: input.reason.trim(),
-    updated_by_name: input.updated_by_name || 'Admin',
-    created_at: historyData.created_at,
+  return {
+    product: {
+      id: updatedProd.id,
+      sku: updatedProd.sku,
+      name: updatedProd.name,
+      category_id: updatedProd.category_id,
+      subcategory: updatedProd.subcategory,
+      unit_id: updatedProd.unit_id,
+      purchase_price: newPurchase,
+      selling_price: newSelling,
+      current_price_version: nextVersion,
+      stock: Number(updatedProd.stock),
+      minimum_stock: Number(updatedProd.minimum_stock),
+      image_url: updatedProd.image_url,
+      notes: updatedProd.notes,
+      inspection_days: [],
+      is_active: updatedProd.is_active,
+      created_at: updatedProd.created_at,
+      updated_at: updatedProd.updated_at,
+      category: updatedProd.category,
+      unit: updatedProd.unit,
+    },
+    priceHistory: {
+      id: historyData.id,
+      product_id: historyData.product_id,
+      product_name: updatedProd.name,
+      version: historyData.version,
+      old_purchase_price: Number(historyData.old_purchase_price),
+      new_purchase_price: Number(historyData.new_purchase_price),
+      old_selling_price: Number(historyData.old_selling_price),
+      new_selling_price: Number(historyData.new_selling_price),
+      change_type: historyData.change_type as PriceChangeType,
+      reason: historyData.reason,
+      updated_by_name: historyData.updated_by_name || 'Admin',
+      created_at: historyData.created_at,
+    },
   };
-
-  const product: Product = {
-    id: updatedProd.id,
-    sku: updatedProd.sku,
-    name: updatedProd.name,
-    category_id: updatedProd.category_id,
-    subcategory: updatedProd.subcategory,
-    unit_id: updatedProd.unit_id,
-    purchase_price: newPurchase,
-    selling_price: newSelling,
-    current_price_version: nextVersion,
-    stock: Number(updatedProd.stock),
-    minimum_stock: Number(updatedProd.minimum_stock),
-    image_url: updatedProd.image_url,
-    notes: updatedProd.notes,
-    is_active: updatedProd.is_active,
-    created_at: updatedProd.created_at,
-    updated_at: updatedProd.updated_at,
-    category: updatedProd.category,
-    unit: updatedProd.unit,
-  };
-
-  return { product, priceHistory };
 }
 
 export async function supabaseDeactivateProduct(id: string): Promise<void> {
