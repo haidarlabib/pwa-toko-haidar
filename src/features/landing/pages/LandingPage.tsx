@@ -1,19 +1,19 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../stores/appStore';
 import {
   ArrowRight,
-  TrendingDown,
-  TrendingUp,
   Clock,
   SlidersHorizontal,
   FileSpreadsheet,
   Eye,
 } from 'lucide-react';
+import { CursorScrubVideo } from '../components/CursorScrubVideo';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, currentUser } = useAppStore();
+  const heroRef = useRef<HTMLElement | null>(null);
 
   const handleEnterSystem = () => {
     if (isAuthenticated && currentUser) {
@@ -41,7 +41,7 @@ export const LandingPage: React.FC = () => {
 
           <button
             onClick={handleEnterSystem}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#121214] text-white text-xs font-semibold hover:bg-[#2C2C30] transition-all shadow-2xs active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#121214] text-white text-xs font-semibold hover:bg-[#2C2C30] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
           >
             <span>Masuk</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -50,9 +50,12 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-5 sm:px-10 pt-12 sm:pt-20 pb-20 space-y-20 sm:space-y-28">
-        {/* Section 1: Hero Section with Purposeful Visual Fragment (PRD Section 8, 9, 10) */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-5 sm:px-10 pt-8 sm:pt-14 pb-20 space-y-20 sm:space-y-28">
+        {/* Section 1: Hero Section with Interactive Character Cursor Scrubbing */}
+        <section
+          ref={heroRef}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[460px]"
+        >
           {/* Left Column: Hero Statement & CTA */}
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-[#75726B] uppercase">
@@ -74,7 +77,7 @@ export const LandingPage: React.FC = () => {
             <div className="pt-2 flex items-center gap-4">
               <button
                 onClick={handleEnterSystem}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
               >
                 <span>Masuk ke Sistem</span>
                 <ArrowRight className="w-4 h-4" />
@@ -85,92 +88,9 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Authentic Operational Fragment Preview (PRD Section 10) */}
-          <div className="lg:col-span-6">
-            <div className="bg-white rounded-xl border border-[#E5E2DA] shadow-xs overflow-hidden">
-              {/* Window Header */}
-              <div className="px-4 py-2.5 bg-[#F5F4EE] border-b border-[#E5E2DA] flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D5D2C9]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D5D2C9]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D5D2C9]" />
-                  <span className="ml-2 text-[10px] font-mono text-[#75726B] font-semibold">
-                    KATALOG OPERASIONAL · LIVE
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  ● Sinkron
-                </span>
-              </div>
-
-              {/* Simulated Operational Data Rows */}
-              <div className="divide-y divide-[#EAE8E2] text-xs">
-                {/* Row 1 */}
-                <div className="p-3.5 flex items-center justify-between hover:bg-[#FAF9F5] transition-colors">
-                  <div className="space-y-0.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#121214] truncate">Plastik HD 15×30 Bening</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F0EFE9] text-[#605D57]">v4</span>
-                    </div>
-                    <div className="text-[11px] text-[#75726B] font-mono">
-                      SKU: HP-PLS-0001 · Stok: <strong>120 PAK</strong>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-mono font-bold text-red-700 flex items-center justify-end gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      <span>Rp14.000</span>
-                    </div>
-                    <span className="text-[10px] text-[#85827B] font-mono">Senin · Rabu · Sabtu</span>
-                  </div>
-                </div>
-
-                {/* Row 2 */}
-                <div className="p-3.5 flex items-center justify-between hover:bg-[#FAF9F5] transition-colors">
-                  <div className="space-y-0.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#121214] truncate">Cup Oval 16oz PP Tebal</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F0EFE9] text-[#605D57]">v2</span>
-                    </div>
-                    <div className="text-[11px] text-[#75726B] font-mono">
-                      SKU: HP-CUP-0002 · Stok: <strong>40 DUS</strong>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-mono font-bold text-emerald-700 flex items-center justify-end gap-1">
-                      <TrendingDown className="w-3 h-3" />
-                      <span>Rp21.500</span>
-                    </div>
-                    <span className="text-[10px] text-[#85827B] font-mono">Kamis · Sabtu</span>
-                  </div>
-                </div>
-
-                {/* Row 3 */}
-                <div className="p-3.5 flex items-center justify-between hover:bg-[#FAF9F5] transition-colors">
-                  <div className="space-y-0.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#121214] truncate">Kresek Los Hitam 24×40</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F0EFE9] text-[#605D57]">v1</span>
-                    </div>
-                    <div className="text-[11px] text-[#75726B] font-mono">
-                      SKU: HP-KRS-0003 · Stok: <strong>85 KG</strong>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-mono font-bold text-[#121214]">
-                      Rp18.000
-                    </div>
-                    <span className="text-[10px] text-emerald-700 font-mono font-medium">✓ Terperiksa</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Operational Summary Strip */}
-              <div className="px-4 py-2 bg-[#FAF9F5] border-t border-[#E5E2DA] flex items-center justify-between text-[11px] font-mono text-[#75726B]">
-                <span>Pemeriksaan Hari Ini: 5 Dijadwalkan</span>
-                <span className="text-[#121214] font-semibold">Asia/Jakarta (WIB)</span>
-              </div>
-            </div>
+          {/* Right Column: Editorial Character Cursor Scrub Experience */}
+          <div className="lg:col-span-6 flex items-center justify-center">
+            <CursorScrubVideo containerRef={heroRef} />
           </div>
         </section>
 
@@ -276,7 +196,7 @@ export const LandingPage: React.FC = () => {
           <div>
             <button
               onClick={handleEnterSystem}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
             >
               <span>Masuk ke Haidar Plastik</span>
               <ArrowRight className="w-4 h-4" />
