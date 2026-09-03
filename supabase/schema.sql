@@ -211,6 +211,35 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- 4. Automatic Deterministic SKU Generator for Products
+CREATE SEQUENCE IF NOT EXISTS public.product_sku_seq START 1;
+
+CREATE OR REPLACE FUNCTION public.generate_product_sku()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_seq BIGINT;
+  v_sku TEXT;
+BEGIN
+  IF NEW.sku IS NULL OR TRIM(NEW.sku) = '' THEN
+    LOOP
+      v_seq := nextval('public.product_sku_seq');
+      v_sku := 'HP-PLS-' || LPAD(v_seq::TEXT, 4, '0');
+      IF NOT EXISTS (SELECT 1 FROM public.products WHERE sku = v_sku) THEN
+        NEW.sku := v_sku;
+        EXIT;
+      END IF;
+    END LOOP;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_generate_product_sku ON public.products;
+CREATE TRIGGER trigger_generate_product_sku
+  BEFORE INSERT ON public.products
+  FOR EACH ROW
+  EXECUTE FUNCTION public.generate_product_sku();
+
 -- ==============================================================================
 -- SAFE STAFF VIEWS (Excludes purchase_price completely)
 -- ==============================================================================

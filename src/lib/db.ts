@@ -272,7 +272,7 @@ export async function addProduct(input: {
   unit_id: string;
   purchase_price: number;
   selling_price: number;
-  initial_stock: number;
+  initial_stock?: number;
   minimum_stock?: number;
   notes?: string;
   image_url?: string;
@@ -292,10 +292,12 @@ export async function addProduct(input: {
   const db = await getDB();
   const now = new Date().toISOString();
   const newId = 'p-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+  const allProds = await db.getAll('products');
+  const autoSku = 'HP-PLS-' + String(allProds.length + 1).padStart(4, '0');
 
   const product: Product = {
     id: newId,
-    sku: input.sku?.trim() || undefined,
+    sku: input.sku?.trim() || autoSku,
     name: input.name.trim(),
     category_id: input.category_id,
     subcategory: input.subcategory?.trim() || undefined,

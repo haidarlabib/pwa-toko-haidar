@@ -110,7 +110,7 @@ export async function supabaseAddProduct(input: {
   unit_id: string;
   purchase_price: number;
   selling_price: number;
-  initial_stock: number;
+  initial_stock?: number;
   minimum_stock?: number;
   notes?: string;
   image_url?: string;
@@ -118,23 +118,30 @@ export async function supabaseAddProduct(input: {
 }): Promise<Product> {
   if (!isRemoteReady()) throw new Error('Supabase not ready');
 
+  const insertPayload: any = {
+    name: input.name.trim(),
+    category_id: input.category_id,
+    unit_id: input.unit_id,
+    purchase_price: Number(input.purchase_price) || 0,
+    selling_price: Number(input.selling_price) || 0,
+    price_version: 1, // Starts strictly at v1
+    stock: Number(input.initial_stock) || 0,
+    minimum_stock: Number(input.minimum_stock) || 0,
+    notes: input.notes?.trim() || null,
+    image_url: input.image_url?.trim() || null,
+    is_active: true,
+  };
+
+  if (input.sku?.trim()) {
+    insertPayload.sku = input.sku.trim();
+  }
+  if (input.subcategory?.trim()) {
+    insertPayload.subcategory = input.subcategory.trim();
+  }
+
   const { data, error } = await supabase
     .from('products')
-    .insert({
-      name: input.name.trim(),
-      sku: input.sku?.trim() || null,
-      category_id: input.category_id,
-      subcategory: input.subcategory?.trim() || null,
-      unit_id: input.unit_id,
-      purchase_price: Number(input.purchase_price) || 0,
-      selling_price: Number(input.selling_price) || 0,
-      price_version: 1, // Starts strictly at v1
-      stock: Number(input.initial_stock) || 0,
-      minimum_stock: Number(input.minimum_stock) || 0,
-      notes: input.notes?.trim() || null,
-      image_url: input.image_url?.trim() || null,
-      is_active: true,
-    })
+    .insert(insertPayload)
     .select(`*, category:categories(*), unit:units(*)`)
     .single();
 

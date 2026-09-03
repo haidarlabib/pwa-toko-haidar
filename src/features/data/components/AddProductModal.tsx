@@ -12,14 +12,10 @@ import { useAppStore } from '../../../stores/appStore';
 
 const addProductSchema = z.object({
   name: z.string().min(2, 'Nama barang wajib diisi (min 2 karakter)'),
-  sku: z.string().optional(),
   category_id: z.string().min(1, 'Pilih kategori'),
-  subcategory: z.string().optional(),
   unit_id: z.string().min(1, 'Pilih satuan'),
   purchase_price: z.coerce.number().min(0, 'Harga modal tidak boleh negatif'),
   selling_price: z.coerce.number().min(0, 'Harga jual tidak boleh negatif'),
-  initial_stock: z.coerce.number().min(0, 'Stok awal tidak boleh negatif'),
-  minimum_stock: z.coerce.number().min(0, 'Batas minimum tidak boleh negatif'),
   notes: z.string().optional(),
 });
 
@@ -63,8 +59,6 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
   } = useForm<AddProductFormData>({
     resolver: zodResolver(addProductSchema) as any,
     defaultValues: {
-      initial_stock: 0,
-      minimum_stock: 10,
       purchase_price: 0,
       selling_price: 0,
     },
@@ -72,20 +66,16 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
 
   const onSubmit = async (data: AddProductFormData) => {
     try {
-      await addProduct({
+      const created = await addProduct({
         name: data.name,
-        sku: data.sku,
         category_id: data.category_id,
-        subcategory: data.subcategory,
         unit_id: data.unit_id,
         purchase_price: data.purchase_price,
         selling_price: data.selling_price,
-        initial_stock: data.initial_stock,
-        minimum_stock: data.minimum_stock,
         notes: data.notes,
         inspection_days: selectedDays,
       });
-      showToast(`Barang "${data.name}" berhasil ditambahkan (Versi Harga v1)`);
+      showToast(`Barang "${data.name}" (${created.sku || 'SKU Auto'}) berhasil ditambahkan (v1)`);
       reset();
       onSuccess();
       onClose();
@@ -118,29 +108,19 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Name & SKU */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="sm:col-span-2">
-            <Input
-              label="Nama Barang"
-              placeholder="Contoh: Plastik HD 15x30 Bening"
-              required
-              error={errors.name?.message}
-              {...register('name')}
-            />
-          </div>
-          <div>
-            <Input
-              label="SKU / Kode Barang"
-              placeholder="HP-PLS-001"
-              error={errors.sku?.message}
-              {...register('sku')}
-            />
-          </div>
+        {/* Name */}
+        <div>
+          <Input
+            label="Nama Barang"
+            placeholder="Contoh: Plastik HD 15x30 Bening"
+            required
+            error={errors.name?.message}
+            {...register('name')}
+          />
         </div>
 
-        {/* Category, Subcategory, Unit */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Category & Unit */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Select
               label="Kategori"
@@ -151,14 +131,6 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
                 ...categories.map((c) => ({ value: c.id, label: c.name })),
               ]}
               {...register('category_id')}
-            />
-          </div>
-          <div>
-            <Input
-              label="Subkategori (Opsional)"
-              placeholder="Contoh: HD Tebal"
-              error={errors.subcategory?.message}
-              {...register('subcategory')}
             />
           </div>
           <div>
@@ -200,25 +172,6 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
               {...register('selling_price')}
             />
           </div>
-        </div>
-
-        {/* Stock & Minimum Stock */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Input
-            label="Stok Sistem Awal"
-            type="number"
-            required
-            error={errors.initial_stock?.message}
-            helperText="Kuantitas fisik resmi saat ini"
-            {...register('initial_stock')}
-          />
-          <Input
-            label="Batas Minimum Stok"
-            type="number"
-            error={errors.minimum_stock?.message}
-            helperText="Peringatan restock jika stok ≤ batas ini"
-            {...register('minimum_stock')}
-          />
         </div>
 
         {/* Inspection Schedule (PRD User Module Section 13-14) */}

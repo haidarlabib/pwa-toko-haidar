@@ -41,7 +41,7 @@ export interface Product {
   selling_price: number;  // Harga Jual (User can see - BR-U05)
   current_price_version: number; // v1, v2, v3... (BR-04, BR-11, BR-16)
   stock: number;          // Official numeric system stock (BR-10, BR-23, BR-U15)
-  minimum_stock: number;
+  minimum_stock?: number;
   image_url?: string;
   notes?: string;
   inspection_days?: DayOfWeek[]; // Days of the week scheduled for inspection (BR-U13, BR-U14)
