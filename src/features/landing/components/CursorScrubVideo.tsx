@@ -13,6 +13,10 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Capability state: default to false for instant lightweight render / SSR safety
+  const [canScrubVideo, setCanScrubVideo] = useState<boolean>(false);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
   // Animation and scrubbing state refs (avoid React re-render loops on cursor move)
   const targetProgressRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
@@ -20,33 +24,23 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
   const rafIdRef = useRef<number | null>(null);
   const isVideoReadyRef = useRef<boolean>(false);
 
-  const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
-
-  // Check device capabilities & accessibility
+  // Capability detection: only enable interactive video on devices with fine pointer & hover (desktop)
   useEffect(() => {
-    const checkTouch = () => {
-      const hasTouch =
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        window.matchMedia('(hover: none)').matches;
-      setIsTouchDevice(hasTouch);
-    };
+    const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const checkReducedMotion = () => {
-      const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setPrefersReducedMotion(media.matches);
-    };
-
-    checkTouch();
-    checkReducedMotion();
+    // Mobile/touch devices or users with reduced motion use the lightweight static poster
+    if (hasFinePointer && !prefersReducedMotion) {
+      setCanScrubVideo(true);
+    } else {
+      setCanScrubVideo(false);
+    }
   }, []);
 
   // Update target scrub progress from client coordinates
   const handlePointerMove = useCallback(
     (clientX: number) => {
-      if (isTouchDevice || prefersReducedMotion) return;
+      if (!canScrubVideo) return;
 
       const trackingElement =
         containerRef?.current || internalContainerRef.current;
@@ -62,12 +56,12 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
       targetProgressRef.current = clampedX;
       isHoveredRef.current = true;
     },
-    [containerRef, isTouchDevice, prefersReducedMotion]
+    [containerRef, canScrubVideo]
   );
 
   // RAF Smooth Scrub Loop
   useEffect(() => {
-    if (isTouchDevice || prefersReducedMotion) return;
+    if (!canScrubVideo) return;
 
     const video = videoRef.current;
     if (!video) return;
@@ -102,7 +96,6 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
               video.currentTime = targetTime;
             }
           } catch {
-            // Safe fallback
             video.currentTime = targetTime;
           }
         }
@@ -119,11 +112,11 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [isTouchDevice, prefersReducedMotion]);
+  }, [canScrubVideo]);
 
-  // Pointer event listeners on the tracking element or window
+  // Pointer event listeners on the tracking element
   useEffect(() => {
-    if (isTouchDevice || prefersReducedMotion) return;
+    if (!canScrubVideo) return;
 
     const trackingElement =
       containerRef?.current || internalContainerRef.current;
@@ -150,7 +143,7 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
       trackingElement.removeEventListener('pointermove', onPointerMove);
       trackingElement.removeEventListener('pointerleave', onPointerLeave);
     };
-  }, [containerRef, handlePointerMove, isTouchDevice, prefersReducedMotion]);
+  }, [containerRef, handlePointerMove, canScrubVideo]);
 
   // Video load event handlers
   const handleLoadedMetadata = () => {
@@ -166,24 +159,39 @@ export const CursorScrubVideo: React.FC<CursorScrubVideoProps> = ({
       ref={internalContainerRef}
       className={`relative w-full aspect-[16/10] sm:aspect-[16/9] max-w-lg lg:max-w-xl mx-auto flex items-center justify-center select-none ${className}`}
     >
-      {/* Seamless transparent character viewport */}
       <div className="relative w-full h-full flex items-center justify-center">
-        {/* Scrubbing Video Element with WebM Alpha + MP4 Theme Fallback */}
-        <video
-          ref={videoRef}
-          poster="/videos/character-poster.webp"
-          muted
-          playsInline
-          preload="auto"
-          onLoadedMetadata={handleLoadedMetadata}
-          className={`w-full h-full object-contain pointer-events-none transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-90'
-          }`}
-          aria-hidden="true"
-        >
-          <source src="/videos/character-scrub.webm" type="video/webm" />
-          <source src="/videos/character-scrub.mp4" type="video/mp4" />
-        </video>
+        {canScrubVideo ? (
+          /* Desktop with fine pointer: Interactive cursor-scrubbing video */
+          <video
+            ref={videoRef}
+            poster="/videos/character-poster.webp"
+            muted
+            playsInline
+            preload="auto"
+            onLoadedMetadata={handleLoadedMetadata}
+            className={`w-full h-full object-contain pointer-events-none transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-90'
+            }`}
+            aria-hidden="true"
+          >
+            <source src="/videos/character-scrub.webm" type="video/webm" />
+            <source src="/videos/character-scrub.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          /* Mobile / Touch / Reduced Motion: Lightweight static transparent character poster (8KB) */
+          <picture className="w-full h-full flex items-center justify-center pointer-events-none">
+            <source srcSet="/videos/character-poster.webp" type="image/webp" />
+            <img
+              src="/videos/character-poster.png"
+              alt="Karakter Haidar Plastik"
+              width={1280}
+              height={720}
+              className="w-full h-full object-contain select-none pointer-events-none"
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
+        )}
       </div>
     </div>
   );

@@ -28,11 +28,11 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] text-[#121214] antialiased selection:bg-[#EAE6DD] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FAF9F5] text-[#121214] antialiased selection:bg-[#EAE6DD] flex flex-col font-sans overflow-x-hidden">
       {/* Quiet Minimal Header (PRD Section 7) */}
-      <header className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#EAE8E2] px-5 sm:px-10 py-4 transition-all">
+      <header className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#EAE8E2] px-4 sm:px-8 lg:px-10 py-3.5 sm:py-4 transition-all">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <span className="w-2.5 h-2.5 rounded-xs bg-[#121214]" />
             <span className="font-extrabold text-sm sm:text-base tracking-wider uppercase text-[#121214]">
               Haidar Plastik
@@ -41,7 +41,7 @@ export const LandingPage: React.FC = () => {
 
           <button
             onClick={handleEnterSystem}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#121214] text-white text-xs font-semibold hover:bg-[#2C2C30] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+            className="inline-flex items-center justify-center min-h-[38px] gap-1.5 px-3.5 py-1.5 rounded-md bg-[#121214] text-white text-xs font-semibold hover:bg-[#2C2C30] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121214] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
           >
             <span>Masuk</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -50,52 +50,96 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-5 sm:px-10 pt-8 sm:pt-14 pb-20 space-y-20 sm:space-y-28">
-        {/* Section 1: Hero Section with Interactive Character Cursor Scrubbing */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 lg:px-10 pt-6 sm:pt-10 lg:pt-14 pb-16 sm:pb-20 space-y-16 sm:space-y-24">
+        {/* Section 1: Responsive Art-Directed Hero Section */}
         <section
           ref={heroRef}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[460px]"
+          className="w-full"
         >
-          {/* Left Column: Hero Statement & CTA */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-[#75726B] uppercase">
+          {/* Desktop & Laptop Layout (>= lg): 2-Column Side-by-Side */}
+          <div className="hidden lg:grid lg:grid-cols-12 gap-10 lg:gap-12 items-center min-h-[460px]">
+            {/* Left Column: Headline, Narrative & CTA */}
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-[#75726B] uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                <span>Sistem Operasional Inventori</span>
+              </div>
+
+              <h1 className="text-4xl lg:text-[54px] font-extrabold tracking-tight text-[#121214] leading-[1.08] text-balance">
+                Kelola barang.<br />
+                Pantau data.<br />
+                <span className="text-[#75726B]">Lebih sederhana.</span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-[#4A4844] leading-relaxed max-w-lg font-normal">
+                Satu sistem untuk mengelola barang, memantau perubahan harga resmi,
+                melakukan pemeriksaan stok harian, dan menjaga riwayat operasional tetap teratur.
+              </p>
+
+              <div className="pt-2 flex items-center gap-4">
+                <button
+                  onClick={handleEnterSystem}
+                  className="inline-flex items-center justify-center min-h-[44px] gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-sm font-semibold hover:bg-[#2A2A2E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121214] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+                >
+                  <span>Masuk ke Sistem</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-[#85827B] font-mono">
+                  PWA Operasional Toko
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Interactive Character Scrub Experience */}
+            <div className="lg:col-span-6 flex items-center justify-center">
+              <CursorScrubVideo containerRef={heroRef} />
+            </div>
+          </div>
+
+          {/* Mobile & Tablet Layout (< lg): Purpose-Built Mobile Flow */}
+          <div className="lg:hidden flex flex-col items-center text-center space-y-6 sm:space-y-8 max-w-lg mx-auto">
+            {/* 1. Eyebrow */}
+            <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono tracking-widest text-[#75726B] uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
               <span>Sistem Operasional Inventori</span>
             </div>
 
-            <h1 className="text-3.5xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight text-[#121214] leading-[1.08] text-balance">
+            {/* 2. Responsive Headline */}
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#121214] leading-[1.12] text-balance">
               Kelola barang.<br />
               Pantau data.<br />
               <span className="text-[#75726B]">Lebih sederhana.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-[#4A4844] leading-relaxed max-w-lg font-normal">
+            {/* 3. Concise Narrative */}
+            <p className="text-xs sm:text-sm text-[#4A4844] leading-relaxed max-w-md font-normal px-2">
               Satu sistem untuk mengelola barang, memantau perubahan harga resmi,
               melakukan pemeriksaan stok harian, dan menjaga riwayat operasional tetap teratur.
             </p>
 
-            <div className="pt-2 flex items-center gap-4">
+            {/* 4. Full-Body Character Poster Visual */}
+            <div className="w-full max-w-[260px] sm:max-w-[320px] aspect-[16/10] flex items-center justify-center py-1">
+              <CursorScrubVideo />
+            </div>
+
+            {/* 5. Mobile Touch-Optimized Primary CTA */}
+            <div className="w-full space-y-2 pt-1">
               <button
                 onClick={handleEnterSystem}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center min-h-[48px] gap-2 px-8 py-3.5 rounded-lg bg-[#121214] text-white text-sm font-semibold hover:bg-[#2A2A2E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121214] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
               >
                 <span>Masuk ke Sistem</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <span className="text-xs text-[#85827B] font-mono">
+              <div className="text-[11px] text-[#85827B] font-mono">
                 PWA Operasional Toko
-              </span>
+              </div>
             </div>
-          </div>
-
-          {/* Right Column: Editorial Character Cursor Scrub Experience */}
-          <div className="lg:col-span-6 flex items-center justify-center">
-            <CursorScrubVideo containerRef={heroRef} />
           </div>
         </section>
 
         {/* Section 2: Progressive Capabilities Storytelling (PRD Section 12 & 13) */}
-        <section className="space-y-8">
+        <section className="space-y-6 sm:space-y-8">
           <div className="pb-3 border-b border-[#EAE8E2] flex items-center justify-between">
             <span className="text-xs font-mono uppercase tracking-widest text-[#75726B]">
               Kapabilitas Sistem
@@ -173,11 +217,11 @@ export const LandingPage: React.FC = () => {
         </section>
 
         {/* Section 3: Operational Philosophy Strip (PRD Section 12) */}
-        <section className="py-8 px-6 sm:px-8 bg-white rounded-xl border border-[#E5E2DA] space-y-2">
+        <section className="py-6 sm:py-8 px-5 sm:px-8 bg-white rounded-xl border border-[#E5E2DA] space-y-2">
           <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
             Filosofi Desain Produk
           </span>
-          <blockquote className="text-base sm:text-xl font-bold text-[#121214] tracking-tight leading-snug">
+          <blockquote className="text-sm sm:text-xl font-bold text-[#121214] tracking-tight leading-snug">
             "Barang untuk melihat. Data untuk mengelola. Riwayat untuk melacak. Export untuk mengeluarkan data."
           </blockquote>
           <p className="text-xs text-[#75726B]">
@@ -196,7 +240,7 @@ export const LandingPage: React.FC = () => {
           <div>
             <button
               onClick={handleEnterSystem}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+              className="inline-flex items-center justify-center min-h-[44px] gap-2 px-6 py-3 rounded-md bg-[#121214] text-white text-xs sm:text-sm font-semibold hover:bg-[#2A2A2E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121214] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
             >
               <span>Masuk ke Haidar Plastik</span>
               <ArrowRight className="w-4 h-4" />
@@ -206,7 +250,7 @@ export const LandingPage: React.FC = () => {
       </main>
 
       {/* Minimal Footer */}
-      <footer className="border-t border-[#EAE8E2] py-6 px-5 sm:px-10 text-center text-xs text-[#85827B] font-mono">
+      <footer className="border-t border-[#EAE8E2] py-6 px-4 sm:px-10 text-center text-xs text-[#85827B] font-mono">
         <p>Haidar Plastik © 2026 · Sistem Manajemen Inventori & Operasional</p>
       </footer>
     </div>
