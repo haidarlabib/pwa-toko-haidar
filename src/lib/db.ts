@@ -10,14 +10,7 @@ import type {
   PriceChangeType,
   DayOfWeek,
 } from '../types/database.types';
-import {
-  INITIAL_CATEGORIES,
-  INITIAL_UNITS,
-  INITIAL_PRODUCTS,
-  INITIAL_PRICE_HISTORY,
-  INITIAL_STOCK_CHECKS,
-  INITIAL_ACTIVITY_LOGS,
-} from './seedData';
+
 import { getPriceChangeType } from '../utils/priceColor';
 import { getCurrentDate, getJakartaNow } from './datetime';
 import {
@@ -113,47 +106,15 @@ export async function getDB(): Promise<IDBPDatabase> {
       },
     });
 
-    const db = await dbPromise;
-    const productCount = await db.count('products');
-    if (productCount === 0) {
-      await seedDatabase(db);
-    }
+    await dbPromise;
   }
   return dbPromise;
-}
-
-async function seedDatabase(db: IDBPDatabase) {
-  const tx = db.transaction(
-    ['categories', 'units', 'products', 'price_history', 'stock_checks', 'activity_logs'],
-    'readwrite'
-  );
-
-  for (const cat of INITIAL_CATEGORIES) {
-    await tx.objectStore('categories').put(cat);
-  }
-  for (const unit of INITIAL_UNITS) {
-    await tx.objectStore('units').put(unit);
-  }
-  for (const prod of INITIAL_PRODUCTS) {
-    await tx.objectStore('products').put(prod);
-  }
-  for (const hist of INITIAL_PRICE_HISTORY) {
-    await tx.objectStore('price_history').put(hist);
-  }
-  for (const check of INITIAL_STOCK_CHECKS) {
-    await tx.objectStore('stock_checks').put(check);
-  }
-  for (const log of INITIAL_ACTIVITY_LOGS) {
-    await tx.objectStore('activity_logs').put(log);
-  }
-
-  await tx.done;
 }
 
 export async function resetDatabase(): Promise<void> {
   const db = await getDB();
   const tx = db.transaction(
-    ['categories', 'units', 'products', 'price_history', 'stock_checks', 'activity_logs'],
+    ['categories', 'units', 'products', 'price_history', 'stock_checks', 'activity_logs', 'stock_check_edit_requests'],
     'readwrite'
   );
   await tx.objectStore('categories').clear();
@@ -162,9 +123,8 @@ export async function resetDatabase(): Promise<void> {
   await tx.objectStore('price_history').clear();
   await tx.objectStore('stock_checks').clear();
   await tx.objectStore('activity_logs').clear();
+  await tx.objectStore('stock_check_edit_requests').clear();
   await tx.done;
-
-  await seedDatabase(db);
 }
 
 // ==========================================

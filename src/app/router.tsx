@@ -96,6 +96,10 @@ export const router = createBrowserRouter([
             element: <UserBarangPage />,
           },
           {
+            path: 'products',
+            element: <Navigate to="/user/barang" replace />,
+          },
+          {
             path: 'check',
             element: <UserCheckPage />,
           },

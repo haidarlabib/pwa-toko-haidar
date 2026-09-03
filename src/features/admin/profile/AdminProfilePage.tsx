@@ -36,10 +36,12 @@ import type {
   ActivityLog,
   Product,
   StockCheckEditRequest,
+  User,
 } from '../../../types/database.types';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 export const AdminProfilePage: React.FC = () => {
-  const { currentUser, logout, availableUsers } = useAppStore();
+  const { currentUser, logout } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
 
@@ -50,6 +52,7 @@ export const AdminProfilePage: React.FC = () => {
   const [editRequests, setEditRequests] = useState<(StockCheckEditRequest & { product_name?: string })[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
 
   const loadSubData = async () => {
     try {
@@ -66,6 +69,25 @@ export const AdminProfilePage: React.FC = () => {
       setEditRequests(reqs);
       setActivityLogs(logs);
       setProducts(prods);
+
+      if (isSupabaseConfigured()) {
+        const { data: profs } = await supabase.from('profiles').select('*').order('created_at', { ascending: true });
+        if (profs && profs.length > 0) {
+          setRegisteredUsers(profs.map((p: any) => ({
+            id: p.id,
+            name: p.full_name,
+            username: p.username,
+            email: p.username + '@haidarplastik.com',
+            role: p.role,
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+          })));
+        } else if (currentUser) {
+          setRegisteredUsers([currentUser]);
+        }
+      } else if (currentUser) {
+        setRegisteredUsers([currentUser]);
+      }
     } catch (err) {
       console.error('Failed to load subdata in profile:', err);
     } finally {
@@ -352,21 +374,25 @@ export const AdminProfilePage: React.FC = () => {
                 <p className="text-xs text-[#75726B]">Daftar akun staf yang terdaftar dalam sistem</p>
               </div>
               <div className="bg-white rounded-xl border border-[#E5E2DA] divide-y divide-[#EAE8E2] overflow-hidden text-xs">
-                {availableUsers.map((u) => (
-                  <div key={u.id} className="p-4 flex items-center justify-between">
-                    <div>
-                      <strong className="text-sm font-bold text-[#121214] block">{u.name}</strong>
-                      <span className="text-xs font-mono text-[#75726B]">@{u.username} · {u.email}</span>
+                {registeredUsers.length === 0 ? (
+                  <div className="p-4 text-center text-[#75726B]">Belum ada pengguna terdaftar.</div>
+                ) : (
+                  registeredUsers.map((u) => (
+                    <div key={u.id} className="p-4 flex items-center justify-between">
+                      <div>
+                        <strong className="text-sm font-bold text-[#121214] block">{u.name}</strong>
+                        <span className="text-xs font-mono text-[#75726B]">@{u.username} · {u.email}</span>
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                        u.role === 'ADMIN'
+                          ? 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      }`}>
+                        {u.role}
+                      </span>
                     </div>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                      u.role === 'ADMIN'
-                        ? 'bg-indigo-50 text-indigo-800 border-indigo-200'
-                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    }`}>
-                      {u.role}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           ) : currentTab === 'about' ? (
