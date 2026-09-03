@@ -28,7 +28,7 @@ export const DeactivateModal: React.FC<DeactivateModalProps> = ({
     try {
       setLoading(true);
       await deactivateProduct(product.id);
-      showToast(`Barang "${product.name}" berhasil dinonaktifkan (Soft Delete)`);
+      showToast(`Barang "${product.name}" berhasil dinonaktifkan`, 'success');
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -42,7 +42,7 @@ export const DeactivateModal: React.FC<DeactivateModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Nonaktifkan Barang (Soft Delete)"
+      title="Nonaktifkan Barang"
       maxWidth="sm"
       footer={
         <>
@@ -60,16 +60,16 @@ export const DeactivateModal: React.FC<DeactivateModalProps> = ({
         </>
       }
     >
-      <div className="space-y-3">
-        <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-          <div className="text-xs text-red-900 leading-relaxed">
+      <div className="space-y-3 font-sans">
+        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="text-xs text-rose-900 leading-relaxed">
             Apakah Anda yakin ingin menonaktifkan <strong>{product.name}</strong>?
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 leading-relaxed">
-          Sesuai aturan sistem (BR-15), data tidak dihapus permanen agar seluruh riwayat harga, audit log, dan pemeriksaan stok tetap terlindungi dan dapat dilacak.
+        <p className="text-xs text-[#75726B] leading-relaxed">
+          Barang yang dinonaktifkan akan disembunyikan dari katalog operasional tanpa menghapus riwayat pemeriksaan atau perubahan harga yang telah ada.
         </p>
       </div>
     </Modal>

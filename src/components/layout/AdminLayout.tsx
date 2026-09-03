@@ -55,11 +55,11 @@ export const AdminLayout: React.FC = () => {
                 Hi, {currentUser?.name || 'Admin'} 👋
               </span>
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Administrator
+                Admin
               </span>
             </div>
             <p className="text-[11px] text-[#75726B]">
-              Haidar Plastik · Admin Management
+              Haidar Plastik · Panel Pengelola
             </p>
           </div>
 

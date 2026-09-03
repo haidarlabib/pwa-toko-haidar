@@ -33,14 +33,14 @@ export const UserLayout: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm sm:text-base font-extrabold text-[#121214] tracking-tight">
-                Hi, {currentUser?.name || 'Staff'} 👋
+                Hi, {currentUser?.name || 'Staf'} 👋
               </span>
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Staff Operasional
+                Staf Toko
               </span>
             </div>
             <p className="text-[11px] text-[#75726B]">
-              Haidar Plastik · Modul Pemeriksaan Toko
+              Haidar Plastik · Operasional Toko
             </p>
           </div>
 

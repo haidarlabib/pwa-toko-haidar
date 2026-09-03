@@ -75,7 +75,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         notes: data.notes,
         inspection_days: selectedDays,
       });
-      showToast(`Barang "${data.name}" (${created.sku || 'SKU Auto'}) berhasil ditambahkan (v1)`);
+      showToast(`Barang "${data.name}" berhasil ditambahkan (${created.sku || 'SKU Dibuat'})`, 'success');
       reset();
       onSuccess();
       onClose();
@@ -89,7 +89,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Tambah Barang Baru"
-      subtitle="Barang baru akan otomatis mulai pada Price Version v1"
+      subtitle="Mendaftarkan produk baru ke katalog toko"
       maxWidth="lg"
       footer={
         <>
@@ -102,85 +102,77 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
             onClick={handleSubmit(onSubmit)}
             isLoading={isSubmitting}
           >
-            Simpan Barang (v1)
+            Simpan Barang
           </Button>
         </>
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Name */}
-        <div>
-          <Input
-            label="Nama Barang"
-            placeholder="Contoh: Plastik HD 15x30 Bening"
-            required
-            error={errors.name?.message}
-            {...register('name')}
-          />
-        </div>
+        <Input
+          label="Nama Barang"
+          placeholder="Contoh: Plastik HD 15x30 Bening"
+          required
+          error={errors.name?.message}
+          {...register('name')}
+        />
 
         {/* Category & Unit */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <Select
-              label="Kategori"
-              required
-              error={errors.category_id?.message}
-              options={[
-                { value: '', label: '-- Pilih Kategori --' },
-                ...categories.map((c) => ({ value: c.id, label: c.name })),
-              ]}
-              {...register('category_id')}
-            />
-          </div>
-          <div>
-            <Select
-              label="Satuan"
-              required
-              error={errors.unit_id?.message}
-              options={[
-                { value: '', label: '-- Pilih Satuan --' },
-                ...units.map((u) => ({ value: u.id, label: `${u.name} (${u.symbol})` })),
-              ]}
-              {...register('unit_id')}
-            />
-          </div>
+          <Select
+            label="Kategori"
+            required
+            error={errors.category_id?.message}
+            options={[
+              { value: '', label: '-- Pilih Kategori --' },
+              ...categories.map((c) => ({ value: c.id, label: c.name })),
+            ]}
+            {...register('category_id')}
+          />
+          <Select
+            label="Satuan"
+            required
+            error={errors.unit_id?.message}
+            options={[
+              { value: '', label: '-- Pilih Satuan --' },
+              ...units.map((u) => ({ value: u.id, label: `${u.name} (${u.symbol})` })),
+            ]}
+            {...register('unit_id')}
+          />
         </div>
 
         {/* Pricing (Modal & Jual) */}
-        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-          <div className="text-xs font-bold uppercase text-slate-500 mb-2">
-            Penetapan Harga Awal
+        <div className="p-3.5 bg-[#FAF9F5] rounded-xl border border-[#E5E2DA] space-y-3">
+          <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-[#75726B]">
+            Penetapan Harga
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Harga Modal (Rp)"
+              label="Harga Modal"
               type="number"
               prefixText="Rp"
               required
               error={errors.purchase_price?.message}
-              helperText="Hanya terlihat oleh Admin (BR-12)"
               {...register('purchase_price')}
             />
             <Input
-              label="Harga Jual (Rp)"
+              label="Harga Jual Resmi"
               type="number"
               prefixText="Rp"
               required
               error={errors.selling_price?.message}
-              helperText="Harga resmi toko ke konsumen"
               {...register('selling_price')}
             />
           </div>
         </div>
 
-        {/* Inspection Schedule (PRD User Module Section 13-14) */}
-        <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
-          <label className="block text-xs font-bold text-indigo-950 mb-1.5">
-            Jadwal Pemeriksaan Harian (Staf User)
+        {/* Inspection Schedule */}
+        <div className="p-3.5 bg-[#FAF9F5] rounded-xl border border-[#E5E2DA]">
+          <label className="block text-xs font-bold text-[#121214] mb-1">
+            Jadwal Pemeriksaan Fisik
           </label>
-          <p className="text-[11px] text-indigo-700/80 mb-2">
-            Pilih hari barang ini harus diperiksa fisik oleh User:
+          <p className="text-[11px] text-[#75726B] mb-2.5">
+            Pilih hari pemeriksaan berkala untuk staf toko:
           </p>
           <div className="flex flex-wrap gap-1.5">
             {INDONESIAN_DAYS.map((day) => {
@@ -190,10 +182,10 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
                   type="button"
                   key={day}
                   onClick={() => toggleDay(day)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-[#121214] text-white border-[#121214] shadow-2xs'
+                      : 'bg-white text-[#605D57] border-[#D5D2C9] hover:bg-[#F5F4EE]'
                   }`}
                 >
                   {day}
@@ -205,13 +197,13 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Catatan Barang (Opsional)
+          <label className="block text-xs font-semibold text-[#33312E] mb-1">
+            Catatan (Opsional)
           </label>
           <textarea
             rows={2}
-            placeholder="Keterangan isi per pack, spesifikasi bahan, atau supplier..."
-            className="w-full text-sm rounded-lg border border-slate-300 p-2.5 bg-white text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-400"
+            placeholder="Keterangan spesifikasi barang atau kemasan..."
+            className="w-full text-xs rounded-lg border border-[#D5D2C9] p-2.5 bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none placeholder-[#A8A49C]"
             {...register('notes')}
           />
         </div>

@@ -32,7 +32,7 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
     try {
       setLoading(true);
       await addCategory(name.trim(), description.trim() || undefined);
-      showToast(`Kategori "${name}" berhasil ditambahkan`);
+      showToast(`Kategori "${name}" berhasil ditambahkan`, 'success');
       setName('');
       setDescription('');
       onSuccess();
@@ -47,8 +47,8 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Kelola Kategori Barang"
-      subtitle="Kategori master produk untuk toko Haidar Plastik"
+      title="Kelola Kategori"
+      subtitle="Kategori master produk toko"
       maxWidth="md"
       footer={
         <Button variant="secondary" size="sm" onClick={onClose}>
@@ -56,11 +56,11 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
         </Button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 font-sans">
         {/* Add Form */}
-        <form onSubmit={handleAdd} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
-          <div className="text-xs font-bold uppercase text-slate-600 flex items-center gap-1.5">
-            <FolderPlus className="w-4 h-4 text-emerald-600" />
+        <form onSubmit={handleAdd} className="p-3.5 bg-[#FAF9F5] rounded-xl border border-[#E5E2DA] space-y-2.5">
+          <div className="text-xs font-bold text-[#121214] flex items-center gap-1.5">
+            <FolderPlus className="w-4 h-4 text-[#121214]" />
             Tambah Kategori Baru
           </div>
           <Input
@@ -74,7 +74,7 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-1">
             <Button variant="primary" size="sm" type="submit" isLoading={loading} disabled={!name.trim()}>
               + Tambah Kategori
             </Button>
@@ -83,20 +83,20 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
 
         {/* Existing categories list */}
         <div>
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div className="text-[10px] font-mono font-bold text-[#75726B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <FolderTree className="w-3.5 h-3.5" />
             Daftar Kategori Aktif ({categories.length})
           </div>
-          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl max-h-56 overflow-y-auto">
+          <div className="divide-y divide-[#EAE8E2] border border-[#E5E2DA] rounded-xl max-h-56 overflow-y-auto">
             {categories.map((c) => (
-              <div key={c.id} className="p-3 hover:bg-slate-50 flex items-center justify-between">
+              <div key={c.id} className="p-3 hover:bg-[#FAF9F5] flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-slate-900">{c.name}</div>
+                  <div className="text-xs font-bold text-[#121214]">{c.name}</div>
                   {c.description && (
-                    <div className="text-[11px] text-slate-400 mt-0.5">{c.description}</div>
+                    <div className="text-[11px] text-[#75726B] mt-0.5">{c.description}</div>
                   )}
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
                   Aktif
                 </span>
               </div>

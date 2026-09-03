@@ -11,21 +11,21 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
     return (
-      <div className="w-full">
+      <div className="w-full font-sans">
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-semibold text-slate-700 mb-1"
+            className="block text-xs font-semibold text-[#33312E] mb-1 tracking-tight"
           >
             {label}
-            {props.required && <span className="text-red-500 ml-0.5">*</span>}
+            {props.required && <span className="text-rose-600 ml-0.5">*</span>}
           </label>
         )}
         <select
           id={selectId}
           ref={ref}
-          className={`block w-full text-sm rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500 ${
-            error ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''
+          className={`block w-full text-xs sm:text-sm rounded-lg border border-[#D5D2C9] px-3 py-2 bg-[#FAF9F5] text-[#121214] transition-all focus:bg-white focus:border-[#121214] focus:outline-none focus:ring-1 focus:ring-[#121214] disabled:bg-[#F5F4EE] disabled:text-[#85827B] shadow-2xs ${
+            error ? 'border-rose-400 focus:border-rose-600 focus:ring-rose-600' : ''
           } ${className}`}
           {...props}
         >
@@ -35,7 +35,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="mt-1 text-xs text-red-600 font-medium">{error}</p>}
+        {error && <p className="mt-1 text-[11px] text-rose-600 font-medium">{error}</p>}
       </div>
     );
   }

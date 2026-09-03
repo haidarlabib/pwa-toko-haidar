@@ -7,7 +7,7 @@ import { formatRupiah } from '../../../utils/currency';
 import { getPriceChangeType, getPriceChangeVisuals, OLD_PRICE_CLASS } from '../../../utils/priceColor';
 import { updateProductPrice } from '../../../lib/db';
 import { useAppStore } from '../../../stores/appStore';
-import { AlertCircle, ShieldAlert } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface UpdatePriceModalProps {
   product: Product | null;
@@ -55,7 +55,7 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
   const handleProceedToConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      setError('Alasan perubahan harga wajib diisi untuk pencatatan audit');
+      setError('Alasan perubahan harga wajib diisi');
       return;
     }
     if (newSellingPrice <= 0) {
@@ -66,7 +66,7 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
       newSellingPrice === product.selling_price &&
       newPurchasePrice === product.purchase_price
     ) {
-      setError('Harga baru sama dengan harga saat ini. Tidak ada perubahan yang perlu diperbarui.');
+      setError('Harga baru sama dengan harga saat ini.');
       return;
     }
 
@@ -83,7 +83,7 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
         reason: reason.trim(),
       });
       showToast(
-        `Harga "${product.name}" resmi diperbarui ke versi v${nextVersion}`,
+        `Harga "${product.name}" berhasil diperbarui ke v${nextVersion}`,
         'success'
       );
       onSuccess();
@@ -99,8 +99,8 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isConfirmStep ? 'Konfirmasi Pembaruan Harga Resmi' : 'Pembaruan Harga Resmi'}
-      subtitle={`Tindakan resmi yang akan menaikkan versi harga (v${currentVersion} → v${nextVersion})`}
+      title={isConfirmStep ? 'Konfirmasi Harga Baru' : 'Update Harga Resmi'}
+      subtitle={`Versi harga akan beralih dari v${currentVersion} ke v${nextVersion}`}
       maxWidth="md"
       footer={
         isConfirmStep ? (
@@ -111,16 +111,15 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
               onClick={() => setIsConfirmStep(false)}
               disabled={isSubmitting}
             >
-              Kembali Edit
+              Kembali
             </Button>
             <Button
               variant="primary"
               size="sm"
               onClick={handleExecuteUpdate}
               isLoading={isSubmitting}
-              className="bg-emerald-600 hover:bg-emerald-700"
             >
-              Sah-kan Harga Baru (v{nextVersion})
+              Terapkan Harga (v{nextVersion})
             </Button>
           </>
         ) : (
@@ -128,7 +127,7 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
             <Button variant="outline" size="sm" onClick={onClose}>
               Batal
             </Button>
-            <Button variant="secondary" size="sm" onClick={handleProceedToConfirm}>
+            <Button variant="primary" size="sm" onClick={handleProceedToConfirm}>
               Tinjau Perubahan →
             </Button>
           </>
@@ -138,16 +137,16 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
       {!isConfirmStep ? (
         <form onSubmit={handleProceedToConfirm} className="space-y-4">
           {/* Header Card */}
-          <div className="p-3.5 bg-slate-900 text-white rounded-xl flex items-center justify-between">
+          <div className="p-3.5 bg-[#FAF9F5] rounded-xl border border-[#E5E2DA] flex items-center justify-between">
             <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                {product.category?.name}
+              <span className="text-[10px] text-[#75726B] font-bold uppercase tracking-wider block">
+                {product.category?.name || 'Katalog'}
               </span>
-              <h4 className="text-sm font-bold truncate max-w-xs">{product.name}</h4>
+              <h4 className="text-sm font-bold text-[#121214] truncate max-w-xs">{product.name}</h4>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 block font-mono">Status Versi</span>
-              <span className="font-mono text-xs font-bold text-emerald-400">
+              <span className="text-[10px] text-[#75726B] block font-mono">Versi</span>
+              <span className="font-mono text-xs font-bold text-[#121214]">
                 v{currentVersion} → v{nextVersion}
               </span>
             </div>
@@ -155,9 +154,9 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
 
           {/* New Price Inputs */}
           <div className="space-y-3">
-            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700">Harga Modal (Admin)</label>
+            <div className="p-3.5 bg-white rounded-xl border border-[#E5E2DA] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-[#121214]">Harga Modal</label>
                 <span className={`text-xs ${OLD_PRICE_CLASS}`}>
                   Saat ini: {formatRupiah(product.purchase_price)}
                 </span>
@@ -171,9 +170,9 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
               />
             </div>
 
-            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700">Harga Jual Resmi</label>
+            <div className="p-3.5 bg-white rounded-xl border border-[#E5E2DA] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-[#121214]">Harga Jual Resmi</label>
                 <span className={`text-xs ${OLD_PRICE_CLASS}`}>
                   Saat ini: {formatRupiah(product.selling_price)}
                 </span>
@@ -185,9 +184,9 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
                 onChange={(e) => setNewSellingPrice(Number(e.target.value))}
                 required
               />
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-xs text-slate-500">Perubahan Jual:</span>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded ${sellingVisuals.badgeClass}`}>
+              <div className="mt-2 flex items-center justify-between pt-1">
+                <span className="text-xs text-[#75726B]">Perubahan Jual:</span>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${sellingVisuals.badgeClass}`}>
                   {sellingVisuals.label} ({formatRupiah(newSellingPrice - product.selling_price)})
                 </span>
               </div>
@@ -195,8 +194,8 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
 
             {/* Mandatory Reason */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Alasan Perubahan Harga <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold text-[#121214] mb-1">
+                Alasan Perubahan Harga <span className="text-rose-600">*</span>
               </label>
               <textarea
                 rows={2}
@@ -205,76 +204,68 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
                   setReason(e.target.value);
                   if (error) setError(null);
                 }}
-                placeholder="Contoh: Harga supplier naik per 1 September / Diskon promo pabrik"
-                className="w-full text-sm rounded-lg border border-slate-300 p-2.5 bg-white text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-400"
+                placeholder="Contoh: Penyesuaian harga supplier per September"
+                className="w-full text-xs rounded-lg border border-[#D5D2C9] p-2.5 bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none placeholder-[#A8A49C]"
                 required
               />
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
         </form>
       ) : (
-        /* Confirmation step strictly demonstrating old vs new per PRD Section 10 & 55 */
+        /* Confirmation step */
         <div className="space-y-4">
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-900 leading-relaxed">
-              <strong>Peringatan Pembaruan Resmi:</strong> Pembaruan harga ini akan langsung dicatat permanen di <strong>Riwayat Harga</strong>, menaikkan <strong>Price Version ke v{nextVersion}</strong>, dan menyiapkan alert perubahan harga untuk dashboard User.
-            </div>
-          </div>
-
-          {/* Comparison Cards */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
-            <div className="text-xs font-bold uppercase text-slate-500 pb-2 border-b border-slate-100">
+          <div className="bg-[#FAF9F5] border border-[#E5E2DA] rounded-xl p-4 space-y-3">
+            <div className="text-xs font-bold uppercase text-[#75726B] pb-2 border-b border-[#EAE8E2]">
               {product.name}
             </div>
 
             {/* Selling Price Diff */}
-            <div className="flex items-center justify-between text-sm py-1">
-              <span className="text-xs text-slate-500 font-medium">Harga Jual:</span>
+            <div className="flex items-center justify-between text-xs sm:text-sm py-1">
+              <span className="text-xs text-[#75726B] font-medium">Harga Jual:</span>
               <div className="flex items-center gap-2">
                 <span className={`text-xs ${OLD_PRICE_CLASS}`}>
                   {formatRupiah(product.selling_price)}
                 </span>
-                <span className="text-slate-400">→</span>
-                <span className={`font-black ${sellingVisuals.textClass}`}>
+                <span className="text-[#85827B]">→</span>
+                <span className={`font-black font-mono ${sellingVisuals.textClass}`}>
                   {formatRupiah(newSellingPrice)}
                 </span>
               </div>
             </div>
 
             {/* Modal Price Diff */}
-            <div className="flex items-center justify-between text-sm py-1 border-t border-slate-100">
-              <span className="text-xs text-slate-500 font-medium">Harga Modal:</span>
+            <div className="flex items-center justify-between text-xs sm:text-sm py-1 border-t border-[#EAE8E2]">
+              <span className="text-xs text-[#75726B] font-medium">Harga Modal:</span>
               <div className="flex items-center gap-2">
                 <span className={`text-xs ${OLD_PRICE_CLASS}`}>
                   {formatRupiah(product.purchase_price)}
                 </span>
-                <span className="text-slate-400">→</span>
-                <span className={`font-bold ${purchaseVisuals.textClass}`}>
+                <span className="text-[#85827B]">→</span>
+                <span className={`font-bold font-mono ${purchaseVisuals.textClass}`}>
                   {formatRupiah(newPurchasePrice)}
                 </span>
               </div>
             </div>
 
             {/* Version Diff */}
-            <div className="flex items-center justify-between text-sm py-1 border-t border-slate-100">
-              <span className="text-xs text-slate-500 font-medium">Price Version:</span>
-              <span className="font-mono text-xs font-bold text-slate-800">
+            <div className="flex items-center justify-between text-xs sm:text-sm py-1 border-t border-[#EAE8E2]">
+              <span className="text-xs text-[#75726B] font-medium">Versi:</span>
+              <span className="font-mono text-xs font-bold text-[#121214]">
                 v{currentVersion} → v{nextVersion}
               </span>
             </div>
 
             {/* Reason */}
-            <div className="text-xs pt-2 border-t border-slate-100">
-              <span className="text-slate-400 font-medium block">Alasan:</span>
-              <span className="text-slate-800 font-semibold italic mt-0.5 block">
+            <div className="text-xs pt-2 border-t border-[#EAE8E2]">
+              <span className="text-[#75726B] font-medium block">Alasan:</span>
+              <span className="text-[#121214] font-semibold italic mt-0.5 block">
                 "{reason}"
               </span>
             </div>

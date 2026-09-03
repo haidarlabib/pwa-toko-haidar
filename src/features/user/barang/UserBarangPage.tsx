@@ -2,16 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getProducts, getCategories, getPriceHistory } from '../../../lib/db';
 import type { Product, Category, PriceHistory } from '../../../types/database.types';
 import { formatRupiah } from '../../../utils/currency';
-import { formatDateTime } from '../../../utils/date';
 import { getPriceChangeVisuals, OLD_PRICE_CLASS } from '../../../utils/priceColor';
-import { Modal } from '../../../components/common/Modal';
-import { Button } from '../../../components/common/Button';
+import { ProductDetailModal } from '../../barang/components/ProductDetailModal';
 import {
   Search,
   Package,
   X,
-  TrendingUp,
-  TrendingDown,
 } from 'lucide-react';
 
 export const UserBarangPage: React.FC = () => {
@@ -77,25 +73,28 @@ export const UserBarangPage: React.FC = () => {
     return result;
   }, [products, selectedCategory, search]);
 
-  const selectedProductHistory = selectedProduct ? latestPriceMap.get(selectedProduct.id) : null;
-
   return (
-    <div className="space-y-6 pb-6 font-sans">
+    <div className="space-y-5 pb-6 font-sans">
       {/* Page Header */}
-      <div className="pb-3 border-b border-[#EAE8E2]">
-        <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
-          Katalog Resmi Toko
-        </span>
-        <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
-          Daftar Barang & Harga Jual
-        </h1>
-        <p className="text-xs text-[#75726B]">
-          Informasi stok sistem dan harga jual resmi toko Haidar Plastik (View Only)
-        </p>
+      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+        <div>
+          <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
+            Katalog Produk
+          </span>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
+            Daftar Barang & Harga
+          </h1>
+          <p className="text-xs text-[#75726B]">
+            Informasi harga jual resmi dan stok katalog barang toko
+          </p>
+        </div>
+        <div className="text-xs font-mono text-[#75726B]">
+          Total: <strong>{products.length}</strong> barang
+        </div>
       </div>
 
       {/* Search & Category Filter */}
-      <div className="bg-white rounded-xl border border-[#E5E2DA] p-3.5 shadow-xs space-y-3">
+      <div className="bg-white rounded-xl border border-[#E5E2DA] p-3.5 shadow-2xs space-y-3">
         {/* Search input */}
         <div className="relative">
           <Search className="w-4 h-4 text-[#85827B] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -103,13 +102,13 @@ export const UserBarangPage: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama barang atau kode SKU..."
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-md border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all"
+            placeholder="Cari nama barang atau SKU..."
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214]"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214] cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -120,7 +119,7 @@ export const UserBarangPage: React.FC = () => {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-[#121214] text-white shadow-2xs'
                 : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
@@ -132,7 +131,7 @@ export const UserBarangPage: React.FC = () => {
             <button
               key={c.id}
               onClick={() => setSelectedCategory(c.id)}
-              className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === c.id
                   ? 'bg-[#121214] text-white shadow-2xs'
                   : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
@@ -165,7 +164,7 @@ export const UserBarangPage: React.FC = () => {
               <div
                 key={product.id}
                 onClick={() => setSelectedProduct(product)}
-                className="bg-white rounded-xl border border-[#E5E2DA] p-4 shadow-2xs hover:border-[#C4C0B6] transition-all cursor-pointer flex flex-col justify-between"
+                className="bg-white rounded-xl border border-[#E5E2DA] p-4 shadow-2xs hover:border-[#B8B4A8] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between active:scale-[0.99]"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -174,7 +173,7 @@ export const UserBarangPage: React.FC = () => {
                         {product.name}
                       </h3>
                       <p className="text-[11px] text-[#75726B] mt-0.5">
-                        {product.category?.name} · {product.unit?.symbol}
+                        {product.category?.name} {product.unit?.symbol ? `· ${product.unit.symbol}` : ''}
                       </p>
                     </div>
                     {product.sku && (
@@ -186,10 +185,9 @@ export const UserBarangPage: React.FC = () => {
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-[#EAE8E2] flex items-end justify-between">
-                  {/* Selling Price ONLY (BR-U04 & BR-U05) */}
                   <div>
                     <span className="text-[10px] uppercase font-bold text-[#85827B] block tracking-wider">
-                      Harga Jual Resmi
+                      Harga Jual
                     </span>
                     {isPriceChanged && visuals ? (
                       <div>
@@ -213,7 +211,6 @@ export const UserBarangPage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Stock tag */}
                   <div className="text-right">
                     <span className="text-[10px] text-[#85827B] block">Stok Sistem</span>
                     <span className="text-xs font-bold font-mono text-[#121214]">
@@ -227,105 +224,12 @@ export const UserBarangPage: React.FC = () => {
         </div>
       )}
 
-      {/* Detail Modal (BR-U04 & BR-U05: Purchase price strictly protected) */}
-      {selectedProduct && (
-        <Modal
-          isOpen={!!selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          title={selectedProduct.name}
-          subtitle={`Kategori: ${selectedProduct.category?.name || '-'} · SKU: ${selectedProduct.sku || '-'}`}
-          maxWidth="md"
-          footer={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedProduct(null)}
-              className="w-full"
-            >
-              Tutup
-            </Button>
-          }
-        >
-          <div className="space-y-4 text-xs font-sans">
-            {/* Price section */}
-            <div className="p-4 rounded-xl bg-[#FAF9F5] border border-[#E5E2DA] space-y-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-[#75726B] block">
-                Harga Jual Resmi Toko
-              </span>
-
-              {selectedProductHistory &&
-              (selectedProductHistory.change_type === 'INCREASE' ||
-                selectedProductHistory.change_type === 'DECREASE') ? (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs line-through text-[#85827B] font-mono">
-                      {formatRupiah(selectedProductHistory.old_selling_price)}
-                    </span>
-                    <span className="text-[#85827B]">→</span>
-                    <span
-                      className={`text-xl font-black font-mono ${
-                        selectedProductHistory.change_type === 'INCREASE'
-                          ? 'text-red-700'
-                          : 'text-emerald-700'
-                      }`}
-                    >
-                      {formatRupiah(selectedProduct.selling_price)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <span
-                      className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded border inline-flex items-center gap-1 ${
-                        selectedProductHistory.change_type === 'INCREASE'
-                          ? 'bg-red-50 text-red-800 border-red-200'
-                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      }`}
-                    >
-                      {selectedProductHistory.change_type === 'INCREASE' ? (
-                        <TrendingUp className="w-3 h-3" />
-                      ) : (
-                        <TrendingDown className="w-3 h-3" />
-                      )}
-                      <span>
-                        {selectedProductHistory.change_type === 'INCREASE'
-                          ? 'Harga Naik'
-                          : 'Harga Turun'}
-                      </span>
-                    </span>
-                    <span className="text-[10px] text-[#75726B] font-mono">
-                      (Diberlakukan {formatDateTime(selectedProductHistory.created_at)})
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-2xl font-black font-mono text-[#121214]">
-                  {formatRupiah(selectedProduct.selling_price)}
-                </div>
-              )}
-            </div>
-
-            {/* General specs */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-lg border border-[#E5E2DA] bg-white space-y-1">
-                <span className="text-[10px] uppercase font-bold text-[#85827B] block">
-                  Stok Sistem
-                </span>
-                <strong className="text-sm font-mono text-[#121214]">
-                  {selectedProduct.stock} {selectedProduct.unit?.symbol}
-                </strong>
-              </div>
-
-              <div className="p-3 rounded-lg border border-[#E5E2DA] bg-white space-y-1">
-                <span className="text-[10px] uppercase font-bold text-[#85827B] block">
-                  Batas Min. Stok
-                </span>
-                <strong className="text-sm font-mono text-[#121214]">
-                  {selectedProduct.minimum_stock} {selectedProduct.unit?.symbol}
-                </strong>
-              </div>
-            </div>
-          </div>
-        </Modal>
-      )}
+      {/* Detail Modal */}
+      <ProductDetailModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </div>
   );
 };
