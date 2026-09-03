@@ -9,6 +9,7 @@ import {
   Mail,
   User,
   AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
@@ -18,6 +19,7 @@ export const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Login form state
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -32,16 +34,18 @@ export const AuthPage: React.FC = () => {
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // Prevent duplicate clicks
     setErrorMessage('');
+    setSuccessMessage('');
     setLoading(true);
 
     try {
       const res = await login(loginIdentifier, loginPassword);
       if (res.success && res.role) {
         if (res.role === 'ADMIN') {
-          navigate('/admin/dashboard');
+          navigate('/admin/dashboard', { replace: true });
         } else {
-          navigate('/user/dashboard');
+          navigate('/user/dashboard', { replace: true });
         }
       } else {
         setErrorMessage(res.error || 'Autentikasi gagal. Silakan periksa kembali email/username dan password.');
@@ -53,9 +57,16 @@ export const AuthPage: React.FC = () => {
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // Prevent duplicate clicks
     setErrorMessage('');
+    setSuccessMessage('');
 
-    if (registerPassword && registerConfirmPassword && registerPassword !== registerConfirmPassword) {
+    if (registerPassword.length < 6) {
+      setErrorMessage('Password minimal 6 karakter');
+      return;
+    }
+
+    if (registerPassword !== registerConfirmPassword) {
       setErrorMessage('Konfirmasi password tidak cocok');
       return;
     }
@@ -69,8 +80,23 @@ export const AuthPage: React.FC = () => {
         password: registerPassword,
       });
 
-      if (res.success && res.role) {
-        navigate('/user/dashboard');
+      if (res.success) {
+        if (res.requiresEmailConfirmation) {
+          setSuccessMessage(
+            res.message ||
+              'Pendaftaran staf berhasil! Tautan konfirmasi telah dikirim ke email Anda. Silakan periksa inbox atau spam sebelum masuk.'
+          );
+          setMode('login');
+          setLoginIdentifier(registerEmail);
+          setRegisterPassword('');
+          setRegisterConfirmPassword('');
+        } else if (res.role) {
+          navigate('/user/dashboard', { replace: true });
+        } else {
+          setSuccessMessage('Akun staf berhasil didaftarkan! Silakan masuk dengan akun Anda.');
+          setMode('login');
+          setLoginIdentifier(registerEmail);
+        }
       } else {
         setErrorMessage(res.error || 'Pendaftaran gagal');
       }
@@ -118,13 +144,15 @@ export const AuthPage: React.FC = () => {
           <div className="grid grid-cols-2 p-1 bg-[#F0EFE9] rounded-lg border border-[#E5E2DA] text-xs font-semibold">
             <button
               type="button"
+              disabled={loading}
               onClick={() => {
                 setMode('login');
                 setErrorMessage('');
+                setSuccessMessage('');
               }}
               className={`py-1.5 rounded-md transition-all ${
                 mode === 'login'
-                  ? 'bg-white text-[#121214] shadow-2xs'
+                  ? 'bg-white text-[#121214] shadow-2xs font-bold'
                   : 'text-[#75726B] hover:text-[#121214]'
               }`}
             >
@@ -132,19 +160,29 @@ export const AuthPage: React.FC = () => {
             </button>
             <button
               type="button"
+              disabled={loading}
               onClick={() => {
                 setMode('register');
                 setErrorMessage('');
+                setSuccessMessage('');
               }}
               className={`py-1.5 rounded-md transition-all ${
                 mode === 'register'
-                  ? 'bg-white text-[#121214] shadow-2xs'
+                  ? 'bg-white text-[#121214] shadow-2xs font-bold'
                   : 'text-[#75726B] hover:text-[#121214]'
               }`}
             >
               Daftar Staf
             </button>
           </div>
+
+          {/* Success Notice */}
+          {successMessage && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-2.5 text-xs text-emerald-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <span className="leading-snug">{successMessage}</span>
+            </div>
+          )}
 
           {/* Error Notice */}
           {errorMessage && (
@@ -166,10 +204,11 @@ export const AuthPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    disabled={loading}
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     placeholder="email@haidar.com atau username"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -185,10 +224,11 @@ export const AuthPage: React.FC = () => {
                   <input
                     type="password"
                     required
+                    disabled={loading}
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -196,7 +236,7 @@ export const AuthPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-md bg-[#121214] text-white text-xs font-bold hover:bg-[#2A2A2E] transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-2xs"
+                className="w-full py-2.5 rounded-md bg-[#121214] text-white text-xs font-bold hover:bg-[#2A2A2E] transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-2xs cursor-pointer"
               >
                 <span>{loading ? 'Memproses...' : 'Masuk ke Sistem'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -212,10 +252,11 @@ export const AuthPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  disabled={loading}
                   value={registerName}
                   onChange={(e) => setRegisterName(e.target.value)}
                   placeholder="Nama staf operasional"
-                  className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all"
+                  className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all disabled:opacity-60"
                 />
               </div>
 
@@ -227,10 +268,11 @@ export const AuthPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    disabled={loading}
                     value={registerUsername}
                     onChange={(e) => setRegisterUsername(e.target.value)}
                     placeholder="username"
-                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
+                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono disabled:opacity-60"
                   />
                 </div>
 
@@ -243,10 +285,11 @@ export const AuthPage: React.FC = () => {
                     <input
                       type="email"
                       required
+                      disabled={loading}
                       value={registerEmail}
                       onChange={(e) => setRegisterEmail(e.target.value)}
-                      placeholder="staf@haidar.com"
-                      className="w-full pl-8 pr-2.5 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all"
+                      placeholder="staf@gmail.com"
+                      className="w-full pl-8 pr-2.5 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -260,10 +303,11 @@ export const AuthPage: React.FC = () => {
                   <input
                     type="password"
                     required
+                    disabled={loading}
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
+                    placeholder="Minimal 6 karakter"
+                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono disabled:opacity-60"
                   />
                 </div>
 
@@ -274,10 +318,11 @@ export const AuthPage: React.FC = () => {
                   <input
                     type="password"
                     required
+                    disabled={loading}
                     value={registerConfirmPassword}
                     onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono"
+                    placeholder="Ulangi password"
+                    className="w-full px-3 py-2 text-xs rounded-md border border-[#D5D2C9] focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none transition-all font-mono disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -289,7 +334,7 @@ export const AuthPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-md bg-[#121214] text-white text-xs font-bold hover:bg-[#2A2A2E] transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-2xs"
+                className="w-full py-2.5 rounded-md bg-[#121214] text-white text-xs font-bold hover:bg-[#2A2A2E] transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-2xs cursor-pointer"
               >
                 <span>{loading ? 'Mendaftarkan...' : 'Daftar Akun Staf'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />

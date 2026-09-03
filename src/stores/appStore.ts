@@ -15,6 +15,14 @@ interface RegisterInput {
   password?: string;
 }
 
+interface AuthResponse {
+  success: boolean;
+  role?: UserRole;
+  requiresEmailConfirmation?: boolean;
+  error?: string;
+  message?: string;
+}
+
 interface AppState {
   isOnline: boolean;
   isAuthLoading: boolean;
@@ -24,14 +32,42 @@ interface AppState {
   setOnline: (status: boolean) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
-  login: (identifier: string, password?: string) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
-  register: (input: RegisterInput) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
+  login: (identifier: string, password?: string) => Promise<AuthResponse>;
+  register: (input: RegisterInput) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   setCurrentUser: (user: User | null) => void;
   syncAuthSession: () => Promise<void>;
 }
 
 const STORAGE_KEY_USER = 'haidar_active_user';
+
+export function mapSupabaseAuthError(err: any): string {
+  if (!err) return 'Terjadi kesalahan autentikasi.';
+  const msg = (err.message || err.error_description || String(err)).toLowerCase();
+
+  if (msg.includes('rate limit') || msg.includes('over_email_send_rate_limit')) {
+    return 'Batas pengiriman email verifikasi dari Supabase tercapai (rate limit). Silakan tunggu beberapa menit sebelum mencoba mendaftar lagi, atau masuk langsung jika akun sudah terdaftar.';
+  }
+  if (msg.includes('user already registered') || msg.includes('already exists') || msg.includes('unique constraint')) {
+    return 'Email sudah terdaftar. Silakan beralih ke tab Masuk untuk login ke akun Anda.';
+  }
+  if (msg.includes('invalid login credentials') || msg.includes('invalid_grant')) {
+    return 'Email atau password salah. Periksa kembali akun Anda.';
+  }
+  if (msg.includes('email not confirmed')) {
+    return 'Email belum dikonfirmasi. Periksa kotak masuk atau spam email Anda untuk mengonfirmasi pendaftaran sebelum masuk.';
+  }
+  if (msg.includes('password should be at least') || msg.includes('weak_password') || msg.includes('at least 6')) {
+    return 'Password terlalu pendek. Gunakan minimal 6 karakter.';
+  }
+  if (msg.includes('invalid email') || msg.includes('unable to validate')) {
+    return 'Format alamat email tidak valid.';
+  }
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
+    return 'Koneksi ke server gagal. Periksa koneksi internet Anda.';
+  }
+  return err.message || 'Terjadi kesalahan sistem saat autentikasi.';
+}
 
 function getStoredInitialUser(): User | null {
   try {
@@ -112,8 +148,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
         } catch {}
       } else {
-        // Session exists but profile query failed or was missing
-        console.warn('Profile not found for session user:', session.user.id);
+        // Session exists but profile lookup had error
         set({ isAuthLoading: false });
       }
     } catch (err) {
@@ -147,9 +182,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (authError || !authData.user) {
         return {
           success: false,
-          error: authError?.message === 'Invalid login credentials'
-            ? 'Email atau password salah. Periksa kembali akun Anda.'
-            : (authError?.message || 'Login gagal. Silakan coba lagi.')
+          error: mapSupabaseAuthError(authError),
         };
       }
 
@@ -186,7 +219,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       get().showToast(`Selamat datang, ${user.name}!`);
       return { success: true, role };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Terjadi kesalahan sistem saat login' };
+      return { success: false, error: mapSupabaseAuthError(err) };
     }
   },
 
@@ -199,11 +232,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       return { success: false, error: 'Semua kolom wajib diisi' };
     }
 
+    if (password.length < 6) {
+      return { success: false, error: 'Password minimal 6 karakter' };
+    }
+
     if (!isSupabaseConfigured()) {
       return { success: false, error: 'Koneksi Supabase belum terkonfigurasi' };
     }
 
     try {
+      // 1. Trigger Supabase Auth signup
       const { data: authData, error: authErr } = await supabase.auth.signUp({
         email: cleanEmail,
         password: password,
@@ -211,49 +249,94 @@ export const useAppStore = create<AppState>((set, get) => ({
           data: {
             full_name: name.trim(),
             username: cleanUsername,
-            role: 'USER', // System strictly forces USER role
+            role: 'USER', // System strictly forces USER role (trigger handle_new_user overrides unconditionally)
           },
         },
       });
 
-      if (authErr || !authData.user) {
+      if (authErr) {
         return {
           success: false,
-          error: authErr?.message || 'Pendaftaran gagal. Silakan periksa kembali email Anda.',
+          error: mapSupabaseAuthError(authErr),
         };
       }
 
-      // Wait a moment for trigger on_auth_user_created to insert profile
-      let role: UserRole = 'USER';
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
-
-      if (profile) {
-        role = profile.role as UserRole;
+      if (!authData.user) {
+        return {
+          success: false,
+          error: 'Pendaftaran gagal dibuat oleh server autentikasi.',
+        };
       }
 
-      const newUser: User = {
-        id: authData.user.id,
-        name: name.trim(),
-        username: cleanUsername,
+      // 2. If session is immediately returned (Email confirmation disabled in Supabase project)
+      if (authData.session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+
+        const role: UserRole = (profile?.role as UserRole) || 'USER';
+        const newUser: User = {
+          id: authData.user.id,
+          name: profile?.full_name || name.trim(),
+          username: profile?.username || cleanUsername,
+          email: cleanEmail,
+          role: role,
+          created_at: profile?.created_at || new Date().toISOString(),
+          updated_at: profile?.updated_at || new Date().toISOString(),
+        };
+
+        set({ currentUser: newUser, isAuthenticated: true, isAuthLoading: false });
+        try {
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(newUser));
+        } catch {}
+
+        get().showToast(`Akun staf "${newUser.name}" berhasil didaftarkan!`);
+        return { success: true, role, requiresEmailConfirmation: false };
+      }
+
+      // 3. If session is null, attempt immediate signInWithPassword (in case auto-confirm is active)
+      const { data: loginData, error: loginErr } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
-        role: role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        password: password,
+      });
+
+      if (!loginErr && loginData.user && loginData.session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', loginData.user.id)
+          .single();
+
+        const role: UserRole = (profile?.role as UserRole) || 'USER';
+        const newUser: User = {
+          id: loginData.user.id,
+          name: profile?.full_name || name.trim(),
+          username: profile?.username || cleanUsername,
+          email: cleanEmail,
+          role: role,
+          created_at: profile?.created_at || new Date().toISOString(),
+          updated_at: profile?.updated_at || new Date().toISOString(),
+        };
+
+        set({ currentUser: newUser, isAuthenticated: true, isAuthLoading: false });
+        try {
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(newUser));
+        } catch {}
+
+        get().showToast(`Akun staf "${newUser.name}" berhasil didaftarkan!`);
+        return { success: true, role, requiresEmailConfirmation: false };
+      }
+
+      // 4. If Supabase project requires email confirmation link
+      return {
+        success: true,
+        requiresEmailConfirmation: true,
+        message: 'Pendaftaran staf berhasil! Tautan konfirmasi telah dikirim ke email Anda. Silakan periksa inbox/spam sebelum masuk.',
       };
-
-      set({ currentUser: newUser, isAuthenticated: true, isAuthLoading: false });
-      try {
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(newUser));
-      } catch {}
-
-      get().showToast(`Akun staf "${newUser.name}" berhasil didaftarkan!`);
-      return { success: true, role };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Terjadi kesalahan sistem saat pendaftaran' };
+      return { success: false, error: mapSupabaseAuthError(err) };
     }
   },
 
