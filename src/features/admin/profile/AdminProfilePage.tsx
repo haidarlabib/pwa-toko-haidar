@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../stores/appStore';
 import { Button } from '../../../components/common/Button';
 import {
@@ -42,6 +42,7 @@ import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 export const AdminProfilePage: React.FC = () => {
   const { currentUser, logout } = useAppStore();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
 
@@ -101,9 +102,9 @@ export const AdminProfilePage: React.FC = () => {
     }
   }, [currentTab]);
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/auth';
+  const handleLogout = async () => {
+    await logout();
+    navigate('/', { replace: true });
   };
 
   const setTab = (tab: string) => {

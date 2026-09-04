@@ -15,9 +15,9 @@ export const UserProfilePage: React.FC = () => {
   const { currentUser, logout } = useAppStore();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/auth');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/', { replace: true });
   };
 
   return (

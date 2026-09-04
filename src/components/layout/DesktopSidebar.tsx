@@ -43,9 +43,9 @@ export const DesktopSidebar: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/auth');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/', { replace: true });
   };
 
   return (

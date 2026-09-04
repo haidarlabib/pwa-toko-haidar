@@ -31,6 +31,14 @@ export const router = createBrowserRouter([
       </PublicAuthRoute>
     ),
   },
+  {
+    path: '/login',
+    element: (
+      <PublicAuthRoute>
+        <AuthPage />
+      </PublicAuthRoute>
+    ),
+  },
 
   // 3. Isolated Admin Management Application (/admin/*)
   // Primary Navigation: Home, Barang, Data, Profil (PRD Section 4 & 5)

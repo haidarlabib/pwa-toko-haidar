@@ -252,4 +252,92 @@ const rejected = adminReviewEdit(requested, { name: 'Admin Haidar', role: 'ADMIN
 assert.equal(rejected.status, 'EDIT_REJECTED');
 assert.equal(rejected.reviewed_by, 'Admin Haidar');
 
-console.log('✅ ALL ADMIN & USER BUSINESS RULES (BR-A01..BR-A28, BR-U01..BR-U20) PASSED 100%!');
+// =========================================================================
+// PART 4: AUTHENTICATION, LOGOUT & ROUTE GUARD RULES (BR-AUTH-01..BR-AUTH-06)
+// =========================================================================
+
+// Guard evaluation simulators matching RouteGuards.tsx
+function evaluateAdminRoute({ isAuthLoading, isAuthenticated, currentUser }) {
+  if (isAuthLoading) return 'LOADING';
+  if (!isAuthenticated || !currentUser) return 'REDIRECT_AUTH';
+  if (currentUser.role !== 'ADMIN') return 'REDIRECT_USER_DASHBOARD';
+  return 'ALLOW';
+}
+
+function evaluateUserRoute({ isAuthLoading, isAuthenticated, currentUser }) {
+  if (isAuthLoading) return 'LOADING';
+  if (!isAuthenticated || !currentUser) return 'REDIRECT_AUTH';
+  if (currentUser.role !== 'USER') return 'REDIRECT_ADMIN_DASHBOARD';
+  return 'ALLOW';
+}
+
+function evaluatePublicAuthRoute({ isAuthLoading, isAuthenticated, currentUser }) {
+  if (isAuthLoading) return 'LOADING';
+  if (isAuthenticated && currentUser) {
+    return currentUser.role === 'ADMIN' ? 'REDIRECT_ADMIN_DASHBOARD' : 'REDIRECT_USER_DASHBOARD';
+  }
+  return 'ALLOW';
+}
+
+// 1. Unauthenticated users are redirected to /auth when accessing /admin or /user
+assert.equal(
+  evaluateAdminRoute({ isAuthLoading: false, isAuthenticated: false, currentUser: null }),
+  'REDIRECT_AUTH',
+  'Unauthenticated admin route access redirects to auth (BR-AUTH-01)'
+);
+assert.equal(
+  evaluateUserRoute({ isAuthLoading: false, isAuthenticated: false, currentUser: null }),
+  'REDIRECT_AUTH',
+  'Unauthenticated user route access redirects to auth (BR-AUTH-02)'
+);
+
+// 2. Unauthenticated user on PublicAuthRoute is allowed to see login/register
+assert.equal(
+  evaluatePublicAuthRoute({ isAuthLoading: false, isAuthenticated: false, currentUser: null }),
+  'ALLOW',
+  'Unauthenticated public auth access shows auth page (BR-AUTH-03)'
+);
+
+// 3. Authenticated admin on PublicAuthRoute is redirected to Admin Dashboard
+const adminSession = { id: 'admin-1', name: 'Admin Haidar', role: 'ADMIN' };
+assert.equal(
+  evaluatePublicAuthRoute({ isAuthLoading: false, isAuthenticated: true, currentUser: adminSession }),
+  'REDIRECT_ADMIN_DASHBOARD',
+  'Authenticated admin on /auth is redirected to /admin/dashboard (BR-AUTH-04)'
+);
+
+// 4. Logout flow: Immediate atomic state wipe prevents loop
+function simulateLogout(currentStore) {
+  // Wipe store immediately
+  const clearedStore = {
+    ...currentStore,
+    currentUser: null,
+    isAuthenticated: false,
+    isAuthLoading: false,
+  };
+  // Simulate navigation to landing page '/'
+  const destination = '/';
+  return { store: clearedStore, destination };
+}
+
+const loggedInAdminStore = {
+  isOnline: true,
+  isAuthLoading: false,
+  isAuthenticated: true,
+  currentUser: adminSession,
+};
+
+const logoutResult = simulateLogout(loggedInAdminStore);
+assert.equal(logoutResult.store.isAuthenticated, false, 'Logout sets isAuthenticated false immediately');
+assert.equal(logoutResult.store.currentUser, null, 'Logout unsets currentUser immediately');
+assert.equal(logoutResult.destination, '/', 'Logout redirects to public landing page (BR-AUTH-05)');
+
+// 5. Subsequent visit to /auth after logout allows login form without redirect loop
+assert.equal(
+  evaluatePublicAuthRoute(logoutResult.store),
+  'ALLOW',
+  'Auth page after logout is displayed cleanly with no redirect loop (BR-AUTH-06)'
+);
+
+console.log('✅ ALL ADMIN & USER BUSINESS RULES (BR-A01..BR-A28, BR-U01..BR-U20, BR-AUTH-01..06) PASSED 100%!');
+

@@ -148,12 +148,15 @@ export const useAppStore = create<AppState>((set, get) => ({
           localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
         } catch {}
       } else {
-        // Session exists but profile lookup had error
-        set({ isAuthLoading: false });
+        // Session exists but profile lookup failed/deleted -> reset to unauthenticated
+        set({ currentUser: null, isAuthenticated: false, isAuthLoading: false });
+        try {
+          localStorage.removeItem(STORAGE_KEY_USER);
+        } catch {}
       }
     } catch (err) {
       console.warn('Auth session check error:', err);
-      set({ isAuthLoading: false });
+      set({ currentUser: null, isAuthenticated: false, isAuthLoading: false });
     }
   },
 
@@ -341,16 +344,21 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
-    if (isSupabaseConfigured()) {
-      try {
-        await supabase.auth.signOut();
-      } catch {}
-    }
-
+    // 1. Immediately reset state in memory and localStorage so all guards evaluate as unauthenticated
     set({ currentUser: null, isAuthenticated: false, isAuthLoading: false });
     try {
       localStorage.removeItem(STORAGE_KEY_USER);
     } catch {}
+
+    // 2. Invalidate Supabase session
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.warn('Supabase signOut error:', err);
+      }
+    }
+
     get().showToast('Anda telah keluar dari sistem', 'info');
   },
 
