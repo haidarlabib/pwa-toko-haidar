@@ -9,7 +9,6 @@ import {
   Coins,
   Warehouse,
   FileText,
-  Tag,
 } from 'lucide-react';
 
 interface ProductDetailModalProps {
@@ -57,17 +56,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div className="flex flex-col items-end gap-1 shrink-0">
               <Badge variant="version">v{product.current_price_version}</Badge>
               {product.unit && (
-                <Badge variant="neutral">{product.unit.symbol}</Badge>
+                <Badge variant="neutral">{product.unit.name || product.unit.symbol}</Badge>
               )}
             </div>
           </div>
-
-          {product.sku && (
-            <div className="mt-2 text-xs font-mono text-[#75726B] flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5" />
-              <span>SKU: {product.sku}</span>
-            </div>
-          )}
         </div>
 
         {/* Pricing Breakdown */}
@@ -81,7 +73,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <div className="text-base font-bold text-[#121214]">
                 {formatRupiah(product.purchase_price)}
               </div>
-              <span className="text-[10px] text-[#75726B]">per {product.unit?.symbol || 'satuan'}</span>
+              <span className="text-[10px] text-[#75726B]">per {product.unit?.name || product.unit?.symbol || 'satuan'}</span>
             </div>
 
             <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/40">
@@ -92,7 +84,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <div className="text-base font-extrabold text-emerald-800">
                 {formatRupiah(product.selling_price)}
               </div>
-              <span className="text-[10px] text-emerald-700">per {product.unit?.symbol || 'satuan'}</span>
+              <span className="text-[10px] text-emerald-700">per {product.unit?.name || product.unit?.symbol || 'satuan'}</span>
             </div>
           </div>
         ) : (
@@ -105,7 +97,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {formatRupiah(product.selling_price)}
               </div>
             </div>
-            <span className="text-xs text-emerald-800 font-medium">per {product.unit?.symbol || 'satuan'}</span>
+            <span className="text-xs text-emerald-800 font-medium">per {product.unit?.name || product.unit?.symbol || 'satuan'}</span>
           </div>
         )}
 
@@ -117,7 +109,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               Stok Sistem
             </span>
             <span className="font-mono text-sm font-bold text-[#121214]">
-              {product.stock} {product.unit?.symbol}
+              {product.stock} {product.unit?.name || product.unit?.symbol || ''}
             </span>
           </div>
         </div>

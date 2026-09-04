@@ -96,7 +96,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Edit Barang"
-      subtitle={`SKU: ${product.sku || '-'} · Versi Harga: v${product.current_price_version}`}
+      subtitle={`Versi Harga: v${product.current_price_version}`}
       maxWidth="md"
       footer={
         <>
@@ -136,7 +136,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
             label="Satuan"
             required
             error={errors.unit_id?.message}
-            options={units.map((u) => ({ value: u.id, label: `${u.name} (${u.symbol})` }))}
+            options={units.map((u) => ({ value: u.id, label: u.name }))}
             {...register('unit_id')}
           />
         </div>

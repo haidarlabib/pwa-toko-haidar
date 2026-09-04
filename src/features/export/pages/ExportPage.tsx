@@ -40,7 +40,6 @@ interface ColumnDef {
 const DATASET_COLUMNS: Record<DatasetType, ColumnDef[]> = {
   products: [
     { key: 'name', label: 'Nama Barang' },
-    { key: 'sku', label: 'SKU' },
     { key: 'category_name', label: 'Kategori' },
     { key: 'unit_name', label: 'Satuan' },
     { key: 'purchase_price_fmt', label: 'Harga Modal (Rp)' },
@@ -200,13 +199,12 @@ export const ExportPage: React.FC = () => {
       case 'prices':
         return products.map((p) => ({
           name: p.name,
-          sku: p.sku || '-',
           category_name: p.category?.name || 'Tanpa Kategori',
-          unit_name: p.unit?.name ? `${p.unit.name} (${p.unit.symbol})` : 'PCS',
+          unit_name: p.unit?.name || p.unit?.symbol || 'Satuan',
           purchase_price_fmt: formatRupiah(p.purchase_price),
           selling_price_fmt: formatRupiah(p.selling_price),
           version_fmt: `v${p.current_price_version}`,
-          stock_fmt: `${p.stock} ${p.unit?.symbol || ''}`,
+          stock_fmt: `${p.stock} ${p.unit?.name || p.unit?.symbol || ''}`,
           notes: p.notes || '-',
         }));
 
@@ -214,7 +212,7 @@ export const ExportPage: React.FC = () => {
         return products.map((p) => ({
           name: p.name,
           category_name: p.category?.name || 'Tanpa Kategori',
-          unit_name: p.unit?.symbol || 'PCS',
+          unit_name: p.unit?.name || p.unit?.symbol || 'Satuan',
           stock: p.stock,
           minimum_stock: p.minimum_stock,
           status:

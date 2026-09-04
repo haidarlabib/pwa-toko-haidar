@@ -2,7 +2,7 @@ import React from 'react';
 import type { Product } from '../../../types/database.types';
 import { formatRupiah } from '../../../utils/currency';
 import { Badge } from '../../../components/common/Badge';
-import { Edit3, TrendingUp, Trash2, Tag } from 'lucide-react';
+import { Edit3, TrendingUp, Trash2 } from 'lucide-react';
 
 interface ProductDataTableProps {
   products: Product[];
@@ -18,13 +18,13 @@ export const ProductDataTable: React.FC<ProductDataTableProps> = ({
   onDeactivate,
 }) => {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E2DA] shadow-2xs overflow-hidden font-sans">
+    <div className="bg-white rounded-xl border border-[#E5E2DA] overflow-hidden shadow-2xs font-sans">
       {/* Desktop Table */}
       <div className="hidden lg:block overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#FAF9F5] border-b border-[#EAE8E2] text-xs font-bold uppercase tracking-wider text-[#75726B] select-none">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-[#FAF9F5] border-b border-[#EAE8E2] text-[#75726B] font-mono uppercase text-[10px] tracking-wider">
             <tr>
-              <th className="px-4 py-3">Nama Barang</th>
+              <th className="px-4 py-3 font-bold">Nama Barang</th>
               <th className="px-4 py-3">Kategori</th>
               <th className="px-4 py-3 text-right">Harga Modal</th>
               <th className="px-4 py-3 text-right">Harga Jual</th>
@@ -38,11 +38,6 @@ export const ProductDataTable: React.FC<ProductDataTableProps> = ({
               <tr key={p.id} className="hover:bg-[#FAF9F5] transition-colors">
                 <td className="px-4 py-3">
                   <div className="font-bold text-[#121214]">{p.name}</div>
-                  {p.sku && (
-                    <div className="text-[11px] font-mono text-[#75726B] mt-0.5">
-                      SKU: {p.sku}
-                    </div>
-                  )}
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-xs text-[#605D57] font-medium">
@@ -59,7 +54,7 @@ export const ProductDataTable: React.FC<ProductDataTableProps> = ({
                   <Badge variant="version">v{p.current_price_version}</Badge>
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-xs font-bold text-[#121214]">
-                  {p.stock} {p.unit?.symbol}
+                  {p.stock} {p.unit?.name || p.unit?.symbol || ''}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="flex items-center justify-center gap-1.5">
@@ -106,16 +101,11 @@ export const ProductDataTable: React.FC<ProductDataTableProps> = ({
                   {p.category?.name || 'Kategori'}
                 </span>
                 <h4 className="text-sm font-bold text-[#121214] leading-snug">{p.name}</h4>
-                {p.sku && (
-                  <span className="text-[11px] font-mono text-[#75726B] flex items-center gap-1 mt-0.5">
-                    <Tag className="w-3 h-3" /> {p.sku}
-                  </span>
-                )}
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 <Badge variant="version">v{p.current_price_version}</Badge>
                 <span className="text-xs font-mono font-bold text-[#121214]">
-                  {p.stock} {p.unit?.symbol}
+                  {p.stock} {p.unit?.name || p.unit?.symbol || ''}
                 </span>
               </div>
             </div>

@@ -24,7 +24,7 @@ export interface Category {
 export interface Unit {
   id: string;
   name: string;
-  symbol: string;
+  symbol?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -32,7 +32,6 @@ export interface Unit {
 
 export interface Product {
   id: string;
-  sku?: string;
   name: string;
   category_id: string;
   subcategory?: string;
@@ -66,7 +65,7 @@ export interface PriceHistory {
   old_selling_price: number;
   new_selling_price: number;
   change_type: PriceChangeType;
-  reason: string;
+  reason?: string;
   updated_by?: string;
   updated_by_name: string;
   created_at: string;

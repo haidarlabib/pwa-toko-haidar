@@ -22,19 +22,17 @@ export const UnitManagerModal: React.FC<UnitManagerModalProps> = ({
 }) => {
   const { showToast } = useAppStore();
   const [name, setName] = useState('');
-  const [symbol, setSymbol] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !symbol.trim()) return;
+    if (!name.trim()) return;
 
     try {
       setLoading(true);
-      await addUnit(name.trim(), symbol.trim().toUpperCase());
-      showToast(`Satuan "${symbol.toUpperCase()}" berhasil ditambahkan`, 'success');
+      await addUnit(name.trim());
+      showToast(`Satuan "${name.trim()}" berhasil ditambahkan`, 'success');
       setName('');
-      setSymbol('');
       onSuccess();
     } catch (err: any) {
       showToast(err.message || 'Gagal menambahkan satuan', 'error');
@@ -48,7 +46,7 @@ export const UnitManagerModal: React.FC<UnitManagerModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Kelola Satuan"
-      subtitle="Master data satuan produk (PCS, PACK, DUS, KG, dll)"
+      subtitle="Master data satuan produk (Pcs, Pack, 1/2 KG, 1/4 KG, Kilo, dll)"
       maxWidth="md"
       footer={
         <Button variant="secondary" size="sm" onClick={onClose}>
@@ -63,31 +61,22 @@ export const UnitManagerModal: React.FC<UnitManagerModalProps> = ({
             <PlusCircle className="w-4 h-4 text-[#121214]" />
             Tambah Satuan Baru
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1">
               <Input
-                placeholder="Nama (contoh: Lembar)"
+                placeholder="Nama satuan (contoh: 1/2 KG, Pcs, Pack, Kilo)"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
-            <div>
-              <Input
-                placeholder="Simbol (LBR)"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="flex justify-end pt-1">
             <Button
               variant="primary"
               size="sm"
               type="submit"
               isLoading={loading}
-              disabled={!name.trim() || !symbol.trim()}
+              disabled={!name.trim()}
+              className="shrink-0"
             >
               + Tambah Satuan
             </Button>
@@ -100,18 +89,15 @@ export const UnitManagerModal: React.FC<UnitManagerModalProps> = ({
             <Ruler className="w-3.5 h-3.5" />
             Daftar Satuan Aktif ({units.length})
           </div>
-          <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto">
             {units.map((u) => (
               <div
                 key={u.id}
                 className="p-2.5 bg-white border border-[#E5E2DA] rounded-lg flex items-center justify-between"
               >
-                <div>
-                  <div className="text-xs font-bold text-[#121214]">{u.name}</div>
-                  <div className="text-[10px] text-[#75726B] font-mono">Simbol: {u.symbol}</div>
-                </div>
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#F5F4EE] text-[#121214] border border-[#E5E2DA]">
-                  {u.symbol}
+                <span className="text-xs font-bold text-[#121214] truncate">{u.name}</span>
+                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#F5F4EE] text-[#75726B] border border-[#E5E2DA]">
+                  Aktif
                 </span>
               </div>
             ))}

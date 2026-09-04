@@ -18,7 +18,7 @@ export const PriceHistoryTab: React.FC<PriceHistoryTabProps> = ({ history }) => 
       if (search.trim()) {
         const q = search.toLowerCase().trim();
         const matchName = item.product_name?.toLowerCase().includes(q);
-        const matchReason = item.reason.toLowerCase().includes(q);
+        const matchReason = item.reason ? item.reason.toLowerCase().includes(q) : false;
         if (!matchName && !matchReason) return false;
       }
       if (filterType !== 'ALL' && item.change_type !== filterType) {

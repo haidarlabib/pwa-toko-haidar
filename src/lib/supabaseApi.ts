@@ -60,7 +60,6 @@ export async function supabaseGetProducts(options?: {
 
     return (prods || []).map((p: any) => ({
       id: p.id,
-      sku: p.sku,
       name: p.name,
       category_id: p.category_id,
       subcategory: p.subcategory,
@@ -77,7 +76,7 @@ export async function supabaseGetProducts(options?: {
       created_at: p.created_at,
       updated_at: p.updated_at,
       category: p.category_name ? { id: p.category_id, name: p.category_name, is_active: true, created_at: '', updated_at: '' } : undefined,
-      unit: p.unit_symbol ? { id: p.unit_id, name: p.unit_name || p.unit_symbol, symbol: p.unit_symbol, is_active: true, created_at: '', updated_at: '' } : undefined,
+      unit: (p.unit_name || p.unit_symbol) ? { id: p.unit_id, name: p.unit_name || p.unit_symbol, symbol: p.unit_symbol || p.unit_name, is_active: true, created_at: '', updated_at: '' } : undefined,
     }));
   }
 
@@ -101,7 +100,6 @@ export async function supabaseGetProducts(options?: {
 
   return (data || []).map((p: any) => ({
     id: p.id,
-    sku: p.sku,
     name: p.name,
     category_id: p.category_id,
     subcategory: p.subcategory,
@@ -124,7 +122,6 @@ export async function supabaseGetProducts(options?: {
 
 export async function supabaseAddProduct(input: {
   name: string;
-  sku?: string;
   category_id: string;
   subcategory?: string;
   unit_id: string;
@@ -152,9 +149,6 @@ export async function supabaseAddProduct(input: {
     is_active: true,
   };
 
-  if (input.sku?.trim()) {
-    insertPayload.sku = input.sku.trim();
-  }
   if (input.subcategory?.trim()) {
     insertPayload.subcategory = input.subcategory.trim();
   }
@@ -194,7 +188,6 @@ export async function supabaseAddProduct(input: {
 
   return {
     id: data.id,
-    sku: data.sku,
     name: data.name,
     category_id: data.category_id,
     subcategory: data.subcategory,
@@ -219,7 +212,6 @@ export async function supabaseEditProduct(
   id: string,
   input: {
     name: string;
-    sku?: string;
     category_id: string;
     subcategory?: string;
     unit_id: string;
@@ -237,7 +229,6 @@ export async function supabaseEditProduct(
     .from('products')
     .update({
       name: input.name.trim(),
-      sku: input.sku?.trim() || null,
       category_id: input.category_id,
       subcategory: input.subcategory?.trim() || null,
       unit_id: input.unit_id,
@@ -276,7 +267,6 @@ export async function supabaseEditProduct(
 
   return {
     id: data.id,
-    sku: data.sku,
     name: data.name,
     category_id: data.category_id,
     subcategory: data.subcategory,
@@ -302,7 +292,7 @@ export async function supabaseUpdateProductPrice(
   input: {
     new_purchase_price: number;
     new_selling_price: number;
-    reason: string;
+    reason?: string;
     updated_by_name?: string;
   }
 ): Promise<{ product: Product; priceHistory: PriceHistory }> {
@@ -314,7 +304,7 @@ export async function supabaseUpdateProductPrice(
       p_product_id: id,
       p_new_purchase_price: Number(input.new_purchase_price),
       p_new_selling_price: Number(input.new_selling_price),
-      p_reason: input.reason.trim(),
+      p_reason: input.reason?.trim() || null,
     });
 
     if (!rpcErr && rpcRes?.success) {
@@ -336,7 +326,6 @@ export async function supabaseUpdateProductPrice(
         return {
           product: {
             id: prodData.id,
-            sku: prodData.sku,
             name: prodData.name,
             category_id: prodData.category_id,
             subcategory: prodData.subcategory,
@@ -418,7 +407,7 @@ export async function supabaseUpdateProductPrice(
       old_selling_price: oldSelling,
       new_selling_price: newSelling,
       change_type: changeType,
-      reason: input.reason.trim(),
+      reason: input.reason?.trim() || null,
       updated_by_name: input.updated_by_name || 'Admin',
     })
     .select('*')
@@ -448,7 +437,6 @@ export async function supabaseUpdateProductPrice(
   return {
     product: {
       id: updatedProd.id,
-      sku: updatedProd.sku,
       name: updatedProd.name,
       category_id: updatedProd.category_id,
       subcategory: updatedProd.subcategory,
@@ -471,14 +459,14 @@ export async function supabaseUpdateProductPrice(
       id: historyData.id,
       product_id: historyData.product_id,
       product_name: updatedProd.name,
-      version: historyData.version,
-      old_purchase_price: Number(historyData.old_purchase_price),
-      new_purchase_price: Number(historyData.new_purchase_price),
-      old_selling_price: Number(historyData.old_selling_price),
-      new_selling_price: Number(historyData.new_selling_price),
-      change_type: historyData.change_type as PriceChangeType,
+      version: nextVersion,
+      old_purchase_price: oldPurchase,
+      new_purchase_price: newPurchase,
+      old_selling_price: oldSelling,
+      new_selling_price: newSelling,
+      change_type: changeType,
       reason: historyData.reason,
-      updated_by_name: historyData.updated_by_name || 'Admin',
+      updated_by_name: historyData.updated_by_name,
       created_at: historyData.created_at,
     },
   };
@@ -553,12 +541,15 @@ export async function supabaseGetUnits(): Promise<Unit[]> {
   return data || [];
 }
 
-export async function supabaseAddUnit(name: string, symbol: string): Promise<Unit> {
+export async function supabaseAddUnit(name: string, symbol?: string): Promise<Unit> {
   if (!isRemoteReady()) throw new Error('Supabase not ready');
+
+  const trimmedName = name.trim();
+  const trimmedSymbol = symbol?.trim() || trimmedName;
 
   const { data, error } = await supabase
     .from('units')
-    .insert({ name: name.trim(), symbol: symbol.trim().toUpperCase(), is_active: true })
+    .insert({ name: trimmedName, symbol: trimmedSymbol, is_active: true })
     .select('*')
     .single();
 
@@ -568,7 +559,7 @@ export async function supabaseAddUnit(name: string, symbol: string): Promise<Uni
     action: 'CREATE_UNIT',
     entity_type: 'UNIT',
     entity_id: data.id,
-    description: `Admin menambahkan satuan baru: ${data.name} (${data.symbol})`,
+    description: `Admin menambahkan satuan baru: ${data.name}`,
   });
 
   return data;

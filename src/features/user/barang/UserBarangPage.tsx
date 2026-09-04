@@ -66,7 +66,6 @@ export const UserBarangPage: React.FC = () => {
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          (p.sku && p.sku.toLowerCase().includes(q)) ||
           (p.category?.name && p.category.name.toLowerCase().includes(q))
       );
     }
@@ -102,7 +101,7 @@ export const UserBarangPage: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama barang atau SKU..."
+            placeholder="Cari nama barang atau kategori..."
             className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
           />
           {search && (
@@ -173,14 +172,9 @@ export const UserBarangPage: React.FC = () => {
                         {product.name}
                       </h3>
                       <p className="text-[11px] text-[#75726B] mt-0.5">
-                        {product.category?.name} {product.unit?.symbol ? `· ${product.unit.symbol}` : ''}
+                        {product.category?.name} {product.unit?.name || product.unit?.symbol ? `· ${product.unit?.name || product.unit?.symbol}` : ''}
                       </p>
                     </div>
-                    {product.sku && (
-                      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#F5F4EE] text-[#605D57] border border-[#E5E2DA] shrink-0">
-                        {product.sku}
-                      </span>
-                    )}
                   </div>
                 </div>
 

@@ -166,7 +166,7 @@ export const LandingPage: React.FC = () => {
                 Katalog produk terstruktur dan bersih.
               </h3>
               <p className="text-xs sm:text-sm text-[#4A4844] leading-relaxed">
-                Menampilkan informasi barang, SKU, kategori, ketersediaan stok, dan harga jual resmi toko tanpa tombol aksi yang membingungkan.
+                Menampilkan informasi barang, kategori, ketersediaan stok, dan harga jual resmi toko tanpa tombol aksi yang membingungkan.
               </p>
             </div>
 

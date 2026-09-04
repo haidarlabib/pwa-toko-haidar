@@ -59,18 +59,18 @@ export const StockAlerts: React.FC<StockAlertsProps> = ({ products }) => {
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">
-                  Min: <span className="font-medium text-slate-700">{p.minimum_stock} {p.unit?.symbol}</span>
+                  Min: <span className="font-medium text-slate-700">{p.minimum_stock} {p.unit?.name || p.unit?.symbol || ''}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 {isOut ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
-                    <XCircle className="w-3.5 h-3.5" /> Habis (0 {p.unit?.symbol})
+                    <XCircle className="w-3.5 h-3.5" /> Habis (0 {p.unit?.name || p.unit?.symbol || ''})
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Sisa {p.stock} {p.unit?.symbol}
+                    <AlertTriangle className="w-3.5 h-3.5" /> Sisa {p.stock} {p.unit?.name || p.unit?.symbol || ''}
                   </span>
                 )}
               </div>

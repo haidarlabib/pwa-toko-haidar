@@ -74,8 +74,7 @@ export const DataPage: React.FC = () => {
       if (search.trim()) {
         const q = search.toLowerCase().trim();
         const matchName = p.name.toLowerCase().includes(q);
-        const matchSku = p.sku ? p.sku.toLowerCase().includes(q) : false;
-        if (!matchName && !matchSku) return false;
+        if (!matchName) return false;
       }
       if (selectedCategory !== 'all' && p.category_id !== selectedCategory) {
         return false;
@@ -358,10 +357,9 @@ export const DataPage: React.FC = () => {
                       <strong className="text-sm font-bold text-[#121214] truncate">
                         {product.name}
                       </strong>
-                      <span className="text-[10px] font-mono text-[#75726B]">({product.sku || '-'})</span>
                     </div>
                     <p className="text-[11px] text-[#75726B]">
-                      {product.category?.name} · Stok: {product.stock} {product.unit?.symbol}
+                      {product.category?.name} · Stok: {product.stock} {product.unit?.name || product.unit?.symbol || ''}
                     </p>
                   </div>
 

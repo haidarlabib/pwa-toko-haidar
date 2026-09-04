@@ -51,7 +51,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cari barang berdasarkan nama, SKU, atau subkategori..."
+          placeholder="Cari barang berdasarkan nama atau subkategori..."
           className="w-full pl-10 pr-9 py-2 text-sm rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-400 bg-white"
         />
         {search && (
@@ -107,7 +107,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             <option value="all">Semua Satuan</option>
             {units.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.name} ({u.symbol})
+                {u.name}
               </option>
             ))}
           </select>

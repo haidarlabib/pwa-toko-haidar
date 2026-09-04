@@ -31,7 +31,7 @@ export const ProductCatalogCard: React.FC<ProductCatalogCardProps> = ({
           <div className="flex items-center gap-1.5 shrink-0">
             <Badge variant="version">v{product.current_price_version}</Badge>
             {product.unit && (
-              <Badge variant="neutral">{product.unit.symbol}</Badge>
+              <Badge variant="neutral">{product.unit.name || product.unit.symbol}</Badge>
             )}
           </div>
         </div>
@@ -40,11 +40,6 @@ export const ProductCatalogCard: React.FC<ProductCatalogCardProps> = ({
         <h3 className="text-sm font-bold text-slate-900 leading-snug">
           {product.name}
         </h3>
-        {product.sku && (
-          <div className="text-[11px] font-mono text-slate-400 mt-0.5">
-            SKU: {product.sku}
-          </div>
-        )}
       </div>
 
       <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
@@ -73,15 +68,15 @@ export const ProductCatalogCard: React.FC<ProductCatalogCardProps> = ({
           <div className="flex items-center gap-1.5">
             {isOutOfStock ? (
               <span className="inline-flex items-center gap-1 font-semibold text-red-600">
-                <XCircle className="w-3.5 h-3.5" /> Habis (0 {product.unit?.symbol})
+                <XCircle className="w-3.5 h-3.5" /> Habis (0 {product.unit?.name || product.unit?.symbol || ''})
               </span>
             ) : isLowStock ? (
               <span className="inline-flex items-center gap-1 font-semibold text-amber-600">
-                <AlertTriangle className="w-3.5 h-3.5" /> Menipis ({product.stock} {product.unit?.symbol})
+                <AlertTriangle className="w-3.5 h-3.5" /> Menipis ({product.stock} {product.unit?.name || product.unit?.symbol || ''})
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 font-medium text-slate-600">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {product.stock} {product.unit?.symbol}
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {product.stock} {product.unit?.name || product.unit?.symbol || ''}
               </span>
             )}
           </div>

@@ -143,7 +143,6 @@ export const INITIAL_UNITS: Unit[] = [
 export const INITIAL_PRODUCTS: Product[] = [
   {
     id: '30000000-0000-0000-0000-000000000001',
-    sku: 'HD-1530-TM',
     name: 'Plastik HD 15x30 Tahan Minyak',
     category_id: '10000000-0000-0000-0000-000000000001',
     subcategory: '15x30',
@@ -161,7 +160,6 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: '30000000-0000-0000-0000-000000000002',
-    sku: 'PP-1220-B',
     name: 'Plastik PP Bening 12x20 Tebal 03',
     category_id: '10000000-0000-0000-0000-000000000002',
     subcategory: '12x20',
@@ -179,7 +177,6 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: '30000000-0000-0000-0000-000000000003',
-    sku: 'KR-24-HTM',
     name: 'Kantong Kresek Hitam 24 (Sedang)',
     category_id: '10000000-0000-0000-0000-000000000004',
     subcategory: 'Kresek 24',
@@ -197,7 +194,6 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: '30000000-0000-0000-0000-000000000004',
-    sku: 'CUP-16-OVAL',
     name: 'Cup Plastik 16 oz Oval Tebal',
     category_id: '10000000-0000-0000-0000-000000000005',
     subcategory: 'Cup 16oz',
@@ -215,7 +211,6 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: '30000000-0000-0000-0000-000000000005',
-    sku: 'SED-ST-STR',
     name: 'Sedotan Steril Higienis Bungkus Kertas',
     category_id: '10000000-0000-0000-0000-000000000006',
     subcategory: 'Sedotan Steril',
@@ -233,7 +228,6 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: '30000000-0000-0000-0000-000000000006',
-    sku: 'PE-1530-ES',
     name: 'Plastik PE Bening Es Batu 15x30',
     category_id: '10000000-0000-0000-0000-000000000003',
     subcategory: '15x30',
@@ -248,7 +242,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     is_active: true,
     created_at: '2026-07-25T11:00:00Z',
     updated_at: '2026-08-15T15:00:00Z',
-  }
+  },
 ];
 
 export const INITIAL_PRICE_HISTORY: PriceHistory[] = [

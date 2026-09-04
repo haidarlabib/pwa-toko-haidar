@@ -54,10 +54,6 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
 
   const handleProceedToConfirm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
-      setError('Alasan perubahan harga wajib diisi');
-      return;
-    }
     if (newSellingPrice <= 0) {
       setError('Harga jual baru harus lebih besar dari Rp 0');
       return;
@@ -80,7 +76,7 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
       await updateProductPrice(product.id, {
         new_purchase_price: newPurchasePrice,
         new_selling_price: newSellingPrice,
-        reason: reason.trim(),
+        reason: reason.trim() || undefined,
       });
       showToast(
         `Harga "${product.name}" berhasil diperbarui ke v${nextVersion}`,
@@ -192,10 +188,10 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
               </div>
             </div>
 
-            {/* Mandatory Reason */}
+            {/* Optional Reason */}
             <div>
               <label className="block text-xs font-bold text-[#121214] mb-1">
-                Alasan Perubahan Harga <span className="text-rose-600">*</span>
+                Alasan Perubahan Harga
               </label>
               <textarea
                 rows={2}
@@ -206,7 +202,6 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
                 }}
                 placeholder="Contoh: Penyesuaian harga supplier per September"
                 className="w-full text-xs rounded-lg border border-[#D5D2C9] p-2.5 bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] outline-none placeholder-[#A8A49C]"
-                required
               />
             </div>
           </div>
@@ -265,9 +260,15 @@ export const UpdatePriceModal: React.FC<UpdatePriceModalProps> = ({
             {/* Reason */}
             <div className="text-xs pt-2 border-t border-[#EAE8E2]">
               <span className="text-[#75726B] font-medium block">Alasan:</span>
-              <span className="text-[#121214] font-semibold italic mt-0.5 block">
-                "{reason}"
-              </span>
+              {reason.trim() ? (
+                <span className="text-[#121214] font-semibold italic mt-0.5 block">
+                  "{reason.trim()}"
+                </span>
+              ) : (
+                <span className="text-[#85827B] italic mt-0.5 block">
+                  (Tidak diisi)
+                </span>
+              )}
             </div>
           </div>
         </div>

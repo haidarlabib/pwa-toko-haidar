@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
 CREATE TABLE IF NOT EXISTS public.units (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
-  symbol TEXT NOT NULL UNIQUE,
+  symbol TEXT UNIQUE,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS public.units (
 -- 5. PRODUCTS TABLE (Master Catalog)
 CREATE TABLE IF NOT EXISTS public.products (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  sku TEXT UNIQUE,
   name TEXT NOT NULL,
   category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
   subcategory TEXT,
@@ -78,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.price_history (
   old_selling_price NUMERIC(12, 2) NOT NULL,
   new_selling_price NUMERIC(12, 2) NOT NULL,
   change_type TEXT NOT NULL CHECK (change_type IN ('INCREASE', 'DECREASE', 'NO_CHANGE')) DEFAULT 'NO_CHANGE',
-  reason TEXT NOT NULL,
+  reason TEXT,
   updated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   updated_by_name TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -211,42 +210,12 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 4. Automatic Deterministic SKU Generator for Products
-CREATE SEQUENCE IF NOT EXISTS public.product_sku_seq START 1;
-
-CREATE OR REPLACE FUNCTION public.generate_product_sku()
-RETURNS TRIGGER AS $$
-DECLARE
-  v_seq BIGINT;
-  v_sku TEXT;
-BEGIN
-  IF NEW.sku IS NULL OR TRIM(NEW.sku) = '' THEN
-    LOOP
-      v_seq := nextval('public.product_sku_seq');
-      v_sku := 'HP-PLS-' || LPAD(v_seq::TEXT, 4, '0');
-      IF NOT EXISTS (SELECT 1 FROM public.products WHERE sku = v_sku) THEN
-        NEW.sku := v_sku;
-        EXIT;
-      END IF;
-    END LOOP;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trigger_generate_product_sku ON public.products;
-CREATE TRIGGER trigger_generate_product_sku
-  BEFORE INSERT ON public.products
-  FOR EACH ROW
-  EXECUTE FUNCTION public.generate_product_sku();
-
 -- ==============================================================================
 -- SAFE STAFF VIEWS (Excludes purchase_price completely)
 -- ==============================================================================
 CREATE OR REPLACE VIEW public.user_safe_products AS
 SELECT
   p.id,
-  p.sku,
   p.name,
   p.category_id,
   p.subcategory,

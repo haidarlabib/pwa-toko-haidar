@@ -5,6 +5,7 @@ import { getProducts, getStockChecks, getPriceHistory } from '../../../lib/db';
 import { getScheduledProductsForToday } from '../../../lib/inspectionSchedule';
 import type { Product, StockCheck, PriceHistory } from '../../../types/database.types';
 import { getCurrentDay, formatDate, getTodayDateString, getJakartaNow, toJakartaDateString } from '../../../lib/datetime';
+import { formatRupiah } from '../../../utils/currency';
 import {
   ClipboardCheck,
   TrendingUp,
@@ -128,44 +129,67 @@ export const UserDashboardPage: React.FC = () => {
             Pemberitahuan Perubahan Harga Resmi
           </h2>
           <span className="text-[11px] font-mono text-[#85827B]">
-            {todayPriceChanges.length} Pembaruan Hari Ini
+            {todayPriceChanges.filter(c => c.old_selling_price !== c.new_selling_price).length} Pembaruan Hari Ini
           </span>
         </div>
 
-        {todayPriceChanges.length === 0 ? (
+        {todayPriceChanges.filter(c => c.old_selling_price !== c.new_selling_price).length === 0 ? (
           <div className="p-4 bg-white rounded-lg border border-[#E5E2DA] text-xs text-[#75726B] text-center">
             Tidak ada perubahan harga jual resmi yang diterbitkan hari ini.
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-[#E5E2DA] divide-y divide-[#EAE8E2] text-xs">
-            {todayPriceChanges.map((change) => {
-              const isIncrease = change.change_type === 'INCREASE';
-              const isDecrease = change.change_type === 'DECREASE';
+            {todayPriceChanges
+              .filter(change => change.old_selling_price !== change.new_selling_price)
+              .map((change) => {
+                const isIncrease = change.change_type === 'INCREASE' || change.new_selling_price > change.old_selling_price;
+                const isDecrease = change.change_type === 'DECREASE' || change.new_selling_price < change.old_selling_price;
 
-              return (
-                <div key={change.id} className="p-3.5 flex items-center justify-between hover:bg-[#FAF9F5] transition-colors">
-                  <div className="space-y-0.5">
-                    <strong className="text-[#121214]">{change.product_name}</strong>
-                    <div className="text-[11px] text-[#75726B]">
-                      Diberlakukan oleh manajemen toko
+                return (
+                  <div
+                    key={change.id}
+                    className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-[#FAF9F5] transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <strong className="text-sm font-bold text-[#121214] block">
+                        {change.product_name || 'Barang'}
+                      </strong>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-[#85827B] font-mono line-through">
+                          {formatRupiah(change.old_selling_price)}
+                        </span>
+                        <span className="text-[#75726B]">→</span>
+                        <span
+                          className={`font-mono font-bold ${
+                            isIncrease ? 'text-red-600' : 'text-emerald-600'
+                          }`}
+                        >
+                          {formatRupiah(change.new_selling_price)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="self-start sm:self-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-bold font-mono px-2.5 py-1 rounded-md border ${
+                          isIncrease
+                            ? 'bg-red-50 text-red-700 border-red-200'
+                            : isDecrease
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-50 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        {isIncrease ? (
+                          <TrendingUp className="w-3.5 h-3.5 text-red-600" />
+                        ) : isDecrease ? (
+                          <TrendingDown className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : null}
+                        <span>{isIncrease ? 'Harga Naik' : isDecrease ? 'Harga Turun' : 'Harga Diperbarui'}</span>
+                      </span>
                     </div>
                   </div>
-
-                  <span
-                    className={`inline-flex items-center gap-1 text-[11px] font-bold font-mono px-2 py-0.5 rounded border ${
-                      isIncrease
-                        ? 'bg-red-50 text-red-800 border-red-200'
-                        : isDecrease
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    {isIncrease ? <TrendingUp className="w-3 h-3" /> : isDecrease ? <TrendingDown className="w-3 h-3" /> : null}
-                    <span>{isIncrease ? 'Harga Naik' : isDecrease ? 'Harga Turun' : 'Harga Diperbarui'}</span>
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         )}
       </section>

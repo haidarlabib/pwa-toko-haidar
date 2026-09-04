@@ -45,17 +45,12 @@ export const ProductCatalogTable: React.FC<ProductCatalogTableProps> = ({
                 >
                   <td className="px-4 py-3">
                     <div className="font-bold text-slate-900">{product.name}</div>
-                    {product.sku && (
-                      <div className="text-[11px] font-mono text-slate-400">
-                        {product.sku}
-                      </div>
-                    )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-600 font-medium">
                     {product.category?.name || '-'}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="neutral">{product.unit?.symbol || '-'}</Badge>
+                    <Badge variant="neutral">{product.unit?.name || product.unit?.symbol || '-'}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-slate-600 text-xs">
                     {formatRupiah(product.purchase_price)}
@@ -67,7 +62,7 @@ export const ProductCatalogTable: React.FC<ProductCatalogTableProps> = ({
                     <Badge variant="version">v{product.current_price_version}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-xs font-semibold">
-                    {product.stock} {product.unit?.symbol}
+                    {product.stock} {product.unit?.name || product.unit?.symbol || ''}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {isOutOfStock ? (

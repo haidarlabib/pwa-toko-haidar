@@ -66,7 +66,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
 
   const onSubmit = async (data: AddProductFormData) => {
     try {
-      const created = await addProduct({
+      await addProduct({
         name: data.name,
         category_id: data.category_id,
         unit_id: data.unit_id,
@@ -75,7 +75,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         notes: data.notes,
         inspection_days: selectedDays,
       });
-      showToast(`Barang "${data.name}" berhasil ditambahkan (${created.sku || 'SKU Dibuat'})`, 'success');
+      showToast(`Barang "${data.name}" berhasil ditambahkan`, 'success');
       reset();
       onSuccess();
       onClose();
@@ -135,7 +135,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
             error={errors.unit_id?.message}
             options={[
               { value: '', label: '-- Pilih Satuan --' },
-              ...units.map((u) => ({ value: u.id, label: `${u.name} (${u.symbol})` })),
+              ...units.map((u) => ({ value: u.id, label: u.name })),
             ]}
             {...register('unit_id')}
           />

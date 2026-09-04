@@ -224,7 +224,6 @@ function applyProductFilters(products: Product[], filters?: any): Product[] {
     filtered = filtered.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        (p.sku && p.sku.toLowerCase().includes(q)) ||
         (p.category?.name && p.category.name.toLowerCase().includes(q)) ||
         (p.subcategory && p.subcategory.toLowerCase().includes(q))
     );
@@ -282,7 +281,6 @@ export async function getProductById(id: string): Promise<Product | null> {
 
 export async function addProduct(input: {
   name: string;
-  sku?: string;
   category_id: string;
   subcategory?: string;
   unit_id: string;
@@ -308,12 +306,9 @@ export async function addProduct(input: {
   const db = await getDB();
   const now = new Date().toISOString();
   const newId = 'p-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-  const allProds = await db.getAll('products');
-  const autoSku = 'HP-PLS-' + String(allProds.length + 1).padStart(4, '0');
 
   const product: Product = {
     id: newId,
-    sku: input.sku?.trim() || autoSku,
     name: input.name.trim(),
     category_id: input.category_id,
     subcategory: input.subcategory?.trim() || undefined,
@@ -356,7 +351,6 @@ export async function editProduct(
   id: string,
   input: {
     name: string;
-    sku?: string;
     category_id: string;
     subcategory?: string;
     unit_id: string;
@@ -388,7 +382,6 @@ export async function editProduct(
   const updated: Product = {
     ...existing,
     name: input.name.trim(),
-    sku: input.sku?.trim() || undefined,
     category_id: input.category_id,
     subcategory: input.subcategory?.trim() || undefined,
     unit_id: input.unit_id,
@@ -469,7 +462,7 @@ export async function updateProductPrice(
   input: {
     new_purchase_price: number;
     new_selling_price: number;
-    reason: string;
+    reason?: string;
   }
 ): Promise<{ product: Product; priceHistory: PriceHistory }> {
   if (isRemoteReady()) {
@@ -515,7 +508,7 @@ export async function updateProductPrice(
     old_selling_price: oldSelling,
     new_selling_price: newSelling,
     change_type: changeType,
-    reason: input.reason.trim(),
+    reason: input.reason?.trim() || undefined,
     updated_by_name: 'Admin Haidar',
     created_at: now,
   };
@@ -657,7 +650,7 @@ export async function getUnits(): Promise<Unit[]> {
   return all.filter((u) => u.is_active).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function addUnit(name: string, symbol: string): Promise<Unit> {
+export async function addUnit(name: string, symbol?: string): Promise<Unit> {
   if (isRemoteReady()) {
     try {
       const remoteUnit = await supabaseAddUnit(name, symbol);
@@ -671,10 +664,11 @@ export async function addUnit(name: string, symbol: string): Promise<Unit> {
 
   const db = await getDB();
   const now = new Date().toISOString();
+  const trimmedName = name.trim();
   const newUnit: Unit = {
     id: 'u-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
-    name: name.trim(),
-    symbol: symbol.trim().toUpperCase(),
+    name: trimmedName,
+    symbol: symbol?.trim() || trimmedName,
     is_active: true,
     created_at: now,
     updated_at: now,
@@ -686,7 +680,7 @@ export async function addUnit(name: string, symbol: string): Promise<Unit> {
     action: 'CREATE_UNIT',
     entity_type: 'UNIT',
     entity_id: newUnit.id,
-    description: `Admin menambahkan satuan baru: ${newUnit.name} (${newUnit.symbol})`,
+    description: `Admin menambahkan satuan baru: ${newUnit.name}`,
     user_name: 'Admin Haidar',
   });
 

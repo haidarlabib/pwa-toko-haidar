@@ -231,14 +231,11 @@ export const UserCheckPage: React.FC = () => {
                         <strong className="text-sm font-bold text-[#121214] truncate">
                           {product.name}
                         </strong>
-                        <span className="text-[11px] font-mono text-[#75726B]">
-                          ({product.sku})
-                        </span>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#605D57] font-mono">
                         <span>
-                          Stok Sistem: <strong className="text-[#121214]">{product.stock} {product.unit?.symbol}</strong>
+                          Stok Sistem: <strong className="text-[#121214]">{product.stock} {product.unit?.name || product.unit?.symbol || ''}</strong>
                         </span>
                         <span>·</span>
                         <span>{product.category?.name}</span>

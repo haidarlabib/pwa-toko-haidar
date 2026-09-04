@@ -29,15 +29,15 @@ INSERT INTO units (id, name, symbol, is_active) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- 4. Insert Products
-INSERT INTO products (id, sku, name, category_id, subcategory, unit_id, purchase_price, selling_price, current_price_version, stock, minimum_stock, notes, is_active) VALUES
-('p0000000-0000-0000-0000-000000000001', 'HP-PLS-0001', 'Plastik HD 15x30 Bening', 'c0000000-0000-0000-0000-000000000001', 'HD Bening', 'u0000000-0000-0000-0000-000000000002', 12000, 14000, 4, 120, 25, 'Kemasan 1 pack isi 100 lembar. Kuat untuk frozen food.', true),
-('p0000000-0000-0000-0000-000000000002', 'HP-PLS-0002', 'Plastik HD 20x35 Tebal', 'c0000000-0000-0000-0000-000000000001', 'HD Tebal', 'u0000000-0000-0000-0000-000000000002', 15500, 18000, 2, 85, 20, 'Bahan tebal 0.04 mm, tidak mudah sobek.', true),
-('p0000000-0000-0000-0000-000000000003', 'HP-KRS-0001', 'Kresek Bening 24x40 Halus', 'c0000000-0000-0000-0000-000000000002', 'Kresek Bening', 'u0000000-0000-0000-0000-000000000002', 9000, 11000, 1, 15, 30, 'Stok menipis, segera restock dari agen Cikarang.', true),
-('p0000000-0000-0000-0000-000000000004', 'HP-CUP-0001', 'Cup Oval 16oz PP Tebal', 'c0000000-0000-0000-0000-000000000003', 'Cup Oval', 'u0000000-0000-0000-0000-000000000003', 185000, 215000, 3, 40, 10, '1 dus isi 1000 pcs (20 roll x 50 pcs). Bisa diseal.', true),
-('p0000000-0000-0000-0000-000000000005', 'HP-CUP-0002', 'Cup Datar 22oz PP Jumbo', 'c0000000-0000-0000-0000-000000000003', 'Cup Datar', 'u0000000-0000-0000-0000-000000000003', 210000, 240000, 1, 0, 8, 'Habis, pesanan supplier sedang di perjalanan.', true),
-('p0000000-0000-0000-0000-000000000006', 'HP-BTL-0001', 'Botol Kale 250ml Tutup Hitam', 'c0000000-0000-0000-0000-000000000004', 'Botol Kale', 'u0000000-0000-0000-0000-000000000002', 42000, 52000, 2, 60, 15, '1 pack isi 50 botol + tutup segel.', true),
-('p0000000-0000-0000-0000-000000000007', 'HP-SDT-0001', 'Sedotan Boba 12mm Steril Hitam', 'c0000000-0000-0000-0000-000000000005', 'Sedotan Boba', 'u0000000-0000-0000-0000-000000000002', 11500, 14500, 1, 95, 20, 'Ujung runcing, dibungkus plastik satu per satu.', true),
-('p0000000-0000-0000-0000-000000000008', 'HP-MIK-0001', 'Thinwall Persegi 650ml', 'c0000000-0000-0000-0000-000000000006', 'Thinwall', 'u0000000-0000-0000-0000-000000000002', 32000, 38000, 1, 110, 25, 'Food grade, microwaveable, 1 pack isi 25 set wadah+tutup.', true)
+INSERT INTO products (id, name, category_id, subcategory, unit_id, purchase_price, selling_price, current_price_version, stock, minimum_stock, notes, is_active) VALUES
+('p0000000-0000-0000-0000-000000000001', 'Plastik HD 15x30 Bening', 'c0000000-0000-0000-0000-000000000001', 'HD Bening', 'u0000000-0000-0000-0000-000000000002', 12000, 14000, 4, 120, 25, 'Kemasan 1 pack isi 100 lembar. Kuat untuk frozen food.', true),
+('p0000000-0000-0000-0000-000000000002', 'Plastik HD 20x35 Tebal', 'c0000000-0000-0000-0000-000000000001', 'HD Tebal', 'u0000000-0000-0000-0000-000000000002', 15500, 18000, 2, 85, 20, 'Bahan tebal 0.04 mm, tidak mudah sobek.', true),
+('p0000000-0000-0000-0000-000000000003', 'Kresek Bening 24x40 Halus', 'c0000000-0000-0000-0000-000000000002', 'Kresek Bening', 'u0000000-0000-0000-0000-000000000002', 9000, 11000, 1, 15, 30, 'Stok menipis, segera restock dari agen Cikarang.', true),
+('p0000000-0000-0000-0000-000000000004', 'Cup Oval 16oz PP Tebal', 'c0000000-0000-0000-0000-000000000003', 'Cup Oval', 'u0000000-0000-0000-0000-000000000003', 185000, 215000, 3, 40, 10, '1 dus isi 1000 pcs (20 roll x 50 pcs). Bisa diseal.', true),
+('p0000000-0000-0000-0000-000000000005', 'Cup Datar 22oz PP Jumbo', 'c0000000-0000-0000-0000-000000000003', 'Cup Datar', 'u0000000-0000-0000-0000-000000000003', 210000, 240000, 1, 0, 8, 'Habis, pesanan supplier sedang di perjalanan.', true),
+('p0000000-0000-0000-0000-000000000006', 'Botol Kale 250ml Tutup Hitam', 'c0000000-0000-0000-0000-000000000004', 'Botol Kale', 'u0000000-0000-0000-0000-000000000002', 42000, 52000, 2, 60, 15, '1 pack isi 50 botol + tutup segel.', true),
+('p0000000-0000-0000-0000-000000000007', 'Sedotan Boba 12mm Steril Hitam', 'c0000000-0000-0000-0000-000000000005', 'Sedotan Boba', 'u0000000-0000-0000-0000-000000000002', 11500, 14500, 1, 95, 20, 'Ujung runcing, dibungkus plastik satu per satu.', true),
+('p0000000-0000-0000-0000-000000000008', 'Thinwall Persegi 650ml', 'c0000000-0000-0000-0000-000000000006', 'Thinwall', 'u0000000-0000-0000-0000-000000000002', 32000, 38000, 1, 110, 25, 'Food grade, microwaveable, 1 pack isi 25 set wadah+tutup.', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 5. Insert Sample Price History (Demonstrating v1 -> v4 for Plastik HD 15x30)
