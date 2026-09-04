@@ -33,7 +33,11 @@ export const LandingPage: React.FC = () => {
       <header className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#EAE8E2] px-4 sm:px-8 lg:px-10 py-3.5 sm:py-4 transition-all">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[#121214]" />
+            <img
+              src="/logo.jpg"
+              alt="Haidar Plastik"
+              className="w-6 h-6 sm:w-7 sm:h-7 object-contain rounded-xs"
+            />
             <span className="font-extrabold text-sm sm:text-base tracking-wider uppercase text-[#121214]">
               Haidar Plastik
             </span>

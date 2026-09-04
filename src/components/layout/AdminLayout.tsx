@@ -49,18 +49,25 @@ export const AdminLayout: React.FC = () => {
       {/* Top Header matching UserLayout style (PRD Section 5) */}
       <header className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#E5E2DA] px-4 py-3 sm:px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-extrabold text-[#121214] tracking-tight">
-                Hi, {currentUser?.name || 'Admin'} 👋
-              </span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Admin
-              </span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo.jpg"
+              alt="Haidar Plastik"
+              className="w-8 h-8 object-contain rounded-xs shrink-0"
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:text-base font-extrabold text-[#121214] tracking-tight">
+                  Hi, {currentUser?.name || 'Admin'} 👋
+                </span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Admin
+                </span>
+              </div>
+              <p className="text-[11px] text-[#75726B]">
+                Haidar Plastik · Panel Pengelola
+              </p>
             </div>
-            <p className="text-[11px] text-[#75726B]">
-              Haidar Plastik · Panel Pengelola
-            </p>
           </div>
 
           <div className="flex items-center gap-3">

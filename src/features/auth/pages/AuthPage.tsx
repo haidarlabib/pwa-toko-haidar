@@ -116,7 +116,11 @@ export const AuthPage: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-700" />
+          <img
+            src="/logo.jpg"
+            alt="Haidar Plastik"
+            className="w-5 h-5 object-contain rounded-xs"
+          />
           <span className="text-[11px] font-mono font-medium tracking-tight text-[#605D57]">
             Haidar Plastik
           </span>
@@ -127,7 +131,14 @@ export const AuthPage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md bg-white border border-[#E5E2DA] rounded-2xl shadow-xs p-6 sm:p-8 space-y-6">
           {/* Header Title */}
-          <div className="space-y-1 text-center">
+          <div className="space-y-2 text-center">
+            <div className="flex justify-center pb-1">
+              <img
+                src="/logo.jpg"
+                alt="Haidar Plastik"
+                className="w-12 h-12 object-contain rounded-md"
+              />
+            </div>
             <h1 className="text-xl font-bold tracking-tight text-[#121214]">
               {mode === 'login' ? 'Masuk ke Akun Anda' : 'Registrasi Staf Baru'}
             </h1>

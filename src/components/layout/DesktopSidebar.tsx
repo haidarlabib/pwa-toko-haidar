@@ -54,8 +54,12 @@ export const DesktopSidebar: React.FC = () => {
       <div className="p-5 border-b border-slate-800">
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block shadow-xs shadow-emerald-400" />
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/logo.jpg"
+                alt="Haidar Plastik"
+                className="w-7 h-7 object-contain rounded-xs"
+              />
               <h1 className="font-black tracking-wider text-base text-white uppercase">
                 Haidar Plastik
               </h1>

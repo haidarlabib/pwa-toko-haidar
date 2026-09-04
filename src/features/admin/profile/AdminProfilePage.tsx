@@ -397,8 +397,18 @@ export const AdminProfilePage: React.FC = () => {
             </div>
           ) : currentTab === 'about' ? (
             <div className="space-y-4 max-w-2xl bg-white rounded-xl border border-[#E5E2DA] p-6 text-xs">
-              <h2 className="text-base font-bold text-[#121214]">Tentang Haidar Plastik Management PWA</h2>
-              <div className="space-y-2 text-[#4A4844] leading-relaxed">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logo.jpg"
+                  alt="Haidar Plastik"
+                  className="w-10 h-10 object-contain rounded-md"
+                />
+                <div>
+                  <h2 className="text-base font-bold text-[#121214]">Tentang Haidar Plastik Management PWA</h2>
+                  <p className="text-[11px] text-[#75726B]">Sistem Manajemen Inventaris & Operasional</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-[#4A4844] leading-relaxed pt-2 border-t border-[#E5E2DA]">
                 <p>
                   <strong>Versi Sistem:</strong> 2.0 (Revised Minimalist Editorial)
                 </p>
