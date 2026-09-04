@@ -119,9 +119,9 @@ export const AuthPage: React.FC = () => {
           <img
             src="/logo.png"
             alt="Haidar Plastik"
-            className="w-5 h-5 object-contain rounded-xs"
+            className="w-6 h-6 object-contain rounded-xs"
           />
-          <span className="text-[11px] font-mono font-medium tracking-tight text-[#605D57]">
+          <span className="text-xs font-bold tracking-tight text-[#121214]">
             Haidar Plastik
           </span>
         </div>
@@ -131,22 +131,26 @@ export const AuthPage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md bg-white border border-[#E5E2DA] rounded-2xl shadow-xs p-6 sm:p-8 space-y-6">
           {/* Header Title */}
-          <div className="space-y-2 text-center">
+          <div className="space-y-3 text-center">
             <div className="flex justify-center pb-1">
-              <img
-                src="/logo.png"
-                alt="Haidar Plastik"
-                className="w-12 h-12 object-contain rounded-md"
-              />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 p-2.5 sm:p-3 rounded-2xl bg-[#F5F4EE] border border-[#E5E2DA] flex items-center justify-center shadow-2xs">
+                <img
+                  src="/logo-white.png"
+                  alt="Haidar Plastik"
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              </div>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-[#121214]">
-              {mode === 'login' ? 'Masuk ke Akun Anda' : 'Registrasi Staf Baru'}
-            </h1>
-            <p className="text-xs text-[#75726B]">
-              {mode === 'login'
-                ? 'Gunakan akun yang telah terdaftar pada sistem.'
-                : 'Daftarkan akun untuk staf operasional toko.'}
-            </p>
+            <div className="space-y-1">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#121214]">
+                {mode === 'login' ? 'Masuk ke Akun Anda' : 'Registrasi Staf Baru'}
+              </h1>
+              <p className="text-xs text-[#75726B]">
+                {mode === 'login'
+                  ? 'Gunakan akun yang telah terdaftar pada sistem.'
+                  : 'Daftarkan akun untuk staf operasional toko.'}
+              </p>
+            </div>
           </div>
 
           {/* Segmented Mode Switcher */}

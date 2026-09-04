@@ -32,11 +32,11 @@ export const LandingPage: React.FC = () => {
       {/* Quiet Minimal Header (PRD Section 7) */}
       <header className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#EAE8E2] px-4 sm:px-8 lg:px-10 py-3.5 sm:py-4 transition-all">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="flex items-center gap-2.5">
             <img
               src="/logo.png"
               alt="Haidar Plastik"
-              className="w-6 h-6 sm:w-7 sm:h-7 object-contain rounded-xs"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded-xs"
             />
             <span className="font-extrabold text-sm sm:text-base tracking-wider uppercase text-[#121214]">
               Haidar Plastik

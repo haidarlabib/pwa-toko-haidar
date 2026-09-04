@@ -53,7 +53,7 @@ export const AdminLayout: React.FC = () => {
             <img
               src="/logo.png"
               alt="Haidar Plastik"
-              className="w-8 h-8 object-contain rounded-xs shrink-0"
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xs shrink-0"
             />
             <div>
               <div className="flex items-center gap-2">

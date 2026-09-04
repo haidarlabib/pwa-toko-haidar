@@ -399,9 +399,9 @@ export const AdminProfilePage: React.FC = () => {
             <div className="space-y-4 max-w-2xl bg-white rounded-xl border border-[#E5E2DA] p-6 text-xs">
               <div className="flex items-center gap-3">
                 <img
-                  src="/logo.png"
+                  src="/logo-white.png"
                   alt="Haidar Plastik"
-                  className="w-10 h-10 object-contain rounded-md"
+                  className="w-12 h-12 object-contain rounded-lg border border-[#E5E2DA] p-1 shadow-2xs"
                 />
                 <div>
                   <h2 className="text-base font-bold text-[#121214]">Tentang Haidar Plastik Management PWA</h2>

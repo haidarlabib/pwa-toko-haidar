@@ -58,7 +58,7 @@ export const DesktopSidebar: React.FC = () => {
               <img
                 src="/logo-white-inverted.png"
                 alt="Haidar Plastik"
-                className="w-7 h-7 object-contain rounded-xs"
+                className="w-8 h-8 object-contain rounded-xs"
               />
               <h1 className="font-black tracking-wider text-base text-white uppercase">
                 Haidar Plastik
