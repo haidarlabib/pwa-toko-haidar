@@ -117,7 +117,7 @@ export const AuthPage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <img
-            src="/logo.jpg"
+            src="/logo.png"
             alt="Haidar Plastik"
             className="w-5 h-5 object-contain rounded-xs"
           />
@@ -134,7 +134,7 @@ export const AuthPage: React.FC = () => {
           <div className="space-y-2 text-center">
             <div className="flex justify-center pb-1">
               <img
-                src="/logo.jpg"
+                src="/logo.png"
                 alt="Haidar Plastik"
                 className="w-12 h-12 object-contain rounded-md"
               />

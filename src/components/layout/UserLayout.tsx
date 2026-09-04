@@ -32,7 +32,7 @@ export const UserLayout: React.FC = () => {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="Haidar Plastik"
               className="w-8 h-8 object-contain rounded-xs shrink-0"
             />

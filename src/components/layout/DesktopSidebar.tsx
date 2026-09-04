@@ -56,7 +56,7 @@ export const DesktopSidebar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2.5">
               <img
-                src="/logo.jpg"
+                src="/logo-white-inverted.png"
                 alt="Haidar Plastik"
                 className="w-7 h-7 object-contain rounded-xs"
               />

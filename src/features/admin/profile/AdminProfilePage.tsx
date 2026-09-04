@@ -399,7 +399,7 @@ export const AdminProfilePage: React.FC = () => {
             <div className="space-y-4 max-w-2xl bg-white rounded-xl border border-[#E5E2DA] p-6 text-xs">
               <div className="flex items-center gap-3">
                 <img
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Haidar Plastik"
                   className="w-10 h-10 object-contain rounded-md"
                 />

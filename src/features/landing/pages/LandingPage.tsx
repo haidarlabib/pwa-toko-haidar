@@ -34,7 +34,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="Haidar Plastik"
               className="w-6 h-6 sm:w-7 sm:h-7 object-contain rounded-xs"
             />
