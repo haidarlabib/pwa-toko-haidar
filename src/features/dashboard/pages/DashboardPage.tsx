@@ -11,10 +11,10 @@ import type {
   Unit,
   PriceHistory,
 } from '../../../types/database.types';
-import { useAppStore } from '../../../stores/appStore';
 import { getCurrentDay, formatDate, getJakartaNow } from '../../../lib/datetime';
 
-// Inventory Analytics Modular Components
+// Modular Dashboard Components
+import { InventorySearchHeader } from '../components/InventorySearchHeader';
 import { InventoryKpiCards } from '../components/InventoryKpiCards';
 import { ProductGrowthChart } from '../components/ProductGrowthChart';
 import { CategoryDistributionCard } from '../components/CategoryDistributionCard';
@@ -22,14 +22,15 @@ import { TopStockCard } from '../components/TopStockCard';
 import { LowStockCard } from '../components/LowStockCard';
 import { PriceAnalyticsCard } from '../components/PriceAnalyticsCard';
 import { UnitDistributionCard } from '../components/UnitDistributionCard';
+import { ProductDetailModal } from '../../barang/components/ProductDetailModal';
 
 export const DashboardPage: React.FC = () => {
-  const { currentUser } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [priceHistories, setPriceHistories] = useState<PriceHistory[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const loadDashboardData = async () => {
     try {
@@ -66,46 +67,24 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-8 font-sans">
-      {/* 1. Header with dynamic greetings & date (Scope Lock) */}
-      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-        <div>
-          <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block font-semibold">
-            Pusat Operasional Toko
-          </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
-            Hi, {currentUser?.name || 'Admin'} 👋
-          </h1>
-          <p className="text-xs text-[#75726B] mt-0.5">
-            Selamat datang kembali di Haidar Plastik
-          </p>
-        </div>
-        <div className="text-xs font-mono text-[#75726B] self-start sm:self-auto">
-          {todayDayName}, {todayDateFormatted}
-        </div>
-      </div>
+      {/* 1. Search-First Header with Live Search & Date (Replaces Greeting Section) */}
+      <InventorySearchHeader
+        products={products}
+        onSelectProduct={(p) => setSelectedProduct(p)}
+        todayDayName={todayDayName}
+        todayDateFormatted={todayDateFormatted}
+      />
 
-      {/* 2. Section Header: ANALISIS INVENTORI */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between pb-1 border-b border-[#EAE8E2]">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-[#75726B] font-bold">
-            Analisis Inventori
-          </h2>
-          <span className="text-[11px] font-mono text-[#85827B]">
-            Data Terpusat
-          </span>
-        </div>
+      {/* 2. KPI / Statistic Cards (4 Columns Desktop, 2 Columns Mobile) */}
+      <InventoryKpiCards
+        totalProducts={products.length}
+        totalCategories={categories.length}
+        totalUnits={units.length}
+        priceChangesCount={recentPriceChangesCount}
+        loading={loading}
+      />
 
-        {/* 3. KPI / Statistic Cards (4 Columns Desktop, 2 Columns Mobile) */}
-        <InventoryKpiCards
-          totalProducts={products.length}
-          totalCategories={categories.length}
-          totalUnits={units.length}
-          priceChangesCount={recentPriceChangesCount}
-          loading={loading}
-        />
-      </div>
-
-      {/* 4. Data Visualizations: Perkembangan Barang & Sebaran Kategori (2 Columns Desktop, 1 Column Mobile) */}
+      {/* 3. Data Visualizations: Perkembangan Barang & Sebaran Kategori (2 Columns Desktop, 1 Column Mobile) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
         {/* A. Perkembangan Jumlah Barang */}
         <ProductGrowthChart products={products} loading={loading} />
@@ -118,7 +97,7 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {/* 5. Stock Analytics: Stok Terbanyak & Stok Terendah (2 Columns Desktop, 1 Column Mobile) */}
+      {/* 4. Stock Analytics: Stok Terbanyak & Stok Terendah (2 Columns Desktop, 1 Column Mobile) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
         {/* A. Stok Terbanyak (Top 5) */}
         <TopStockCard products={products} loading={loading} />
@@ -127,7 +106,7 @@ export const DashboardPage: React.FC = () => {
         <LowStockCard products={products} loading={loading} />
       </div>
 
-      {/* 6. Price & Unit Analytics: Perubahan Harga & Distribusi Satuan (2 Columns Desktop, 1 Column Mobile) */}
+      {/* 5. Price & Unit Analytics: Perubahan Harga & Distribusi Satuan (2 Columns Desktop, 1 Column Mobile) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
         {/* A. Perubahan Harga Resmi */}
         <PriceAnalyticsCard
@@ -142,6 +121,13 @@ export const DashboardPage: React.FC = () => {
           loading={loading}
         />
       </div>
+
+      {/* 6. Product Detail Modal for Quick Search Inspection */}
+      <ProductDetailModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </div>
   );
 };
