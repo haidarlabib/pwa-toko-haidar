@@ -96,22 +96,23 @@ export const BarangPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Search & Category Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      {/* Search & Category Filter Control Row */}
+      <div className="flex items-center gap-2">
         {/* Search input */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-[#85827B] absolute left-3 top-1/2 -translate-y-1/2" />
+        <div className="relative flex-1 min-w-0">
+          <Search className="w-4 h-4 text-[#85827B] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama barang..."
-            className="w-full h-9 pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
+            placeholder="Cari nama barang atau kategori..."
+            className="w-full h-10 pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] placeholder:text-[#85827B] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
           />
           {search && (
             <button
+              type="button"
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214] cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214] p-0.5 rounded cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

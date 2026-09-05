@@ -25,9 +25,9 @@ export const CategoryFilterPopover: React.FC<CategoryFilterPopoverProps> = ({
   const activeCategory = categories.find((c) => c.id === selectedCategory);
   const isFiltered = selectedCategory !== 'all';
 
-  // Handle click outside to close popover
+  // Handle click outside and Escape key to close popover
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -40,11 +40,13 @@ export const CategoryFilterPopover: React.FC<CategoryFilterPopoverProps> = ({
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('mousedown', handlePointerDown);
+      document.addEventListener('touchstart', handlePointerDown);
       document.addEventListener('keydown', handleKeyDown);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
@@ -60,46 +62,52 @@ export const CategoryFilterPopover: React.FC<CategoryFilterPopoverProps> = ({
   };
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {/* Trigger Button */}
+    <div ref={containerRef} className={`relative shrink-0 ${className}`}>
+      {/* Filter Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`h-9 px-3 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap select-none ${
+        className={`h-10 px-3 sm:px-3.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#121214] active:scale-[0.98] ${
           isFiltered
             ? 'bg-[#121214] text-white border-[#121214] shadow-xs'
-            : 'bg-[#FAF9F5] text-[#121214] border-[#D5D2C9] hover:bg-[#F0EEE6] hover:border-[#121214]'
+            : 'bg-white text-[#121214] border-[#D5D2C9] hover:bg-[#FAF9F5] hover:border-[#121214] shadow-2xs'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
+        title={isFiltered ? `Filter aktif: ${activeCategory?.name}` : 'Buka filter kategori'}
       >
-        <Filter className={`w-3.5 h-3.5 ${isFiltered ? 'text-white' : 'text-[#75726B]'}`} />
-        <span>
-          {isFiltered ? `Filter · ${activeCategory?.name || 'Kategori'}` : 'Semua Kategori'}
-        </span>
+        <Filter className={`w-3.5 h-3.5 shrink-0 ${isFiltered ? 'text-white' : 'text-[#75726B]'}`} />
+        
+        {isFiltered ? (
+          <span className="max-w-[100px] sm:max-w-[140px] truncate">
+            {activeCategory?.name || 'Kategori'}
+          </span>
+        ) : (
+          <span>Filter</span>
+        )}
 
         {isFiltered ? (
           <span
             onClick={handleClear}
             role="button"
             tabIndex={0}
-            title="Hapus filter"
-            className="ml-1 p-0.5 rounded hover:bg-white/20 transition-colors"
+            title="Reset filter kategori"
+            className="p-0.5 ml-0.5 rounded hover:bg-white/20 active:bg-white/30 transition-colors"
           >
-            <X className="w-3 h-3 text-white" />
+            <X className="w-3.5 h-3.5 text-white" />
           </span>
         ) : (
           <ChevronDown
-            className={`w-3.5 h-3.5 text-[#75726B] transition-transform duration-150 ${
+            className={`w-3.5 h-3.5 text-[#75726B] shrink-0 transition-transform duration-150 ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
         )}
       </button>
 
-      {/* Popover Card */}
+      {/* Popover Dropdown Card */}
       {isOpen && (
-        <div className="absolute right-0 sm:left-0 sm:right-auto mt-1.5 w-64 sm:w-72 bg-white rounded-xl border border-[#E5E2DA] shadow-xl z-50 p-2 space-y-1 animate-in fade-in duration-150">
+        <div className="absolute right-0 top-full mt-1.5 w-64 sm:w-72 max-w-[calc(100vw-32px)] bg-white rounded-xl border border-[#E5E2DA] shadow-xl z-50 p-2 space-y-1 animate-in fade-in duration-150">
           {/* Header */}
           <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-[#EAE8E2]">
             <span className="text-xs font-bold text-[#121214]">Filter Kategori</span>
@@ -115,26 +123,26 @@ export const CategoryFilterPopover: React.FC<CategoryFilterPopoverProps> = ({
           </div>
 
           {/* List of Options */}
-          <div className="max-h-64 overflow-y-auto py-1 space-y-0.5">
-            {/* All Categories Option */}
+          <div className="max-h-64 sm:max-h-72 overflow-y-auto overscroll-contain py-1 space-y-0.5">
+            {/* "Semua Kategori" Option */}
             <button
               type="button"
               onClick={() => handleSelect('all')}
-              className={`w-full min-h-[38px] px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer text-left ${
+              className={`w-full min-h-[40px] px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer text-left ${
                 selectedCategory === 'all'
                   ? 'bg-[#F5F4EE] font-bold text-[#121214]'
                   : 'text-[#605D57] hover:bg-[#FAF9F5] hover:text-[#121214]'
               }`}
             >
               <div className="flex items-center gap-2">
-                <span>Semua Kategori</span>
+                <span className="truncate">Semua Kategori</span>
                 {totalCount !== undefined && (
-                  <span className="text-[10px] font-mono text-[#75726B] px-1.5 py-0.2 rounded bg-[#EAE8E2]">
+                  <span className="text-[10px] font-mono text-[#75726B] px-1.5 py-0.5 rounded bg-[#EAE8E2]">
                     {totalCount}
                   </span>
                 )}
               </div>
-              {selectedCategory === 'all' && <Check className="w-3.5 h-3.5 text-[#121214]" />}
+              {selectedCategory === 'all' && <Check className="w-3.5 h-3.5 text-[#121214] shrink-0" />}
             </button>
 
             {/* Category Items */}
@@ -147,21 +155,21 @@ export const CategoryFilterPopover: React.FC<CategoryFilterPopoverProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() => handleSelect(cat.id)}
-                  className={`w-full min-h-[38px] px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer text-left ${
+                  className={`w-full min-h-[40px] px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer text-left ${
                     isSelected
                       ? 'bg-[#F5F4EE] font-bold text-[#121214]'
                       : 'text-[#605D57] hover:bg-[#FAF9F5] hover:text-[#121214]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0 pr-2">
                     <span className="truncate">{cat.name}</span>
                     {count !== undefined && (
-                      <span className="text-[10px] font-mono text-[#75726B] px-1.5 py-0.2 rounded bg-[#EAE8E2]">
+                      <span className="text-[10px] font-mono text-[#75726B] px-1.5 py-0.5 rounded bg-[#EAE8E2] shrink-0">
                         {count}
                       </span>
                     )}
                   </div>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-[#121214]" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-[#121214] shrink-0" />}
                 </button>
               );
             })}
