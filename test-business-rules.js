@@ -339,5 +339,107 @@ assert.equal(
   'Auth page after logout is displayed cleanly with no redirect loop (BR-AUTH-06)'
 );
 
-console.log('✅ ALL ADMIN & USER BUSINESS RULES (BR-A01..BR-A28, BR-U01..BR-U20, BR-AUTH-01..06) PASSED 100%!');
+// =========================================================================
+// PART 5: INVENTORY ANALYTICS & DASHBOARD METRIC RULES (BR-INV-01..BR-INV-07)
+// =========================================================================
+
+const sampleProducts = [
+  { id: 'p-1', name: 'Plastik HD 15x30', category_id: 'c-1', unit_id: 'u-1', stock: 1250, created_at: '2026-08-01T00:00:00Z', is_active: true },
+  { id: 'p-2', name: 'Plastik 6x10', category_id: 'c-1', unit_id: 'u-2', stock: 980, created_at: '2026-08-15T00:00:00Z', is_active: true },
+  { id: 'p-3', name: 'Wayang 8x12', category_id: 'c-1', unit_id: 'u-2', stock: 760, created_at: '2026-09-01T00:00:00Z', is_active: true },
+  { id: 'p-4', name: 'Tali Rafia Roll', category_id: 'c-2', unit_id: 'u-3', stock: 5, created_at: '2026-09-02T00:00:00Z', is_active: true },
+  { id: 'p-5', name: 'Cup 12 oz', category_id: 'c-2', unit_id: 'u-2', stock: 0, created_at: '2026-09-03T00:00:00Z', is_active: true },
+];
+
+const sampleCategories = [
+  { id: 'c-1', name: 'Plastik Kemasan', is_active: true },
+  { id: 'c-2', name: 'Perlengkapan & Cup', is_active: true },
+  { id: 'c-3', name: 'Bahan Kue', is_active: true },
+];
+
+const sampleUnits = [
+  { id: 'u-1', name: 'PCS', symbol: 'Pcs', is_active: true },
+  { id: 'u-2', name: 'PACK', symbol: 'Pack', is_active: true },
+  { id: 'u-3', name: 'ROLL', symbol: 'Roll', is_active: true },
+];
+
+const samplePriceHistory = [
+  { id: 'h-1', product_id: 'p-1', old_selling_price: 12000, new_selling_price: 14000, change_type: 'INCREASE', created_at: new Date(Date.now() - 5 * 86400000).toISOString() },
+  { id: 'h-2', product_id: 'p-2', old_selling_price: 15000, new_selling_price: 13500, change_type: 'DECREASE', created_at: new Date(Date.now() - 10 * 86400000).toISOString() },
+  { id: 'h-3', product_id: 'p-3', old_selling_price: 8000, new_selling_price: 8000, change_type: 'NO_CHANGE', created_at: new Date(Date.now() - 40 * 86400000).toISOString() }, // Older than 30 days
+];
+
+// BR-INV-01: Active KPI Metrics
+const totalActiveProducts = sampleProducts.filter((p) => p.is_active).length;
+const totalActiveCategories = sampleCategories.filter((c) => c.is_active).length;
+const totalActiveUnits = sampleUnits.filter((u) => u.is_active).length;
+const thirtyDaysAgo = Date.now() - 30 * 86400000;
+const priceChangesLast30Days = samplePriceHistory.filter(
+  (h) => new Date(h.created_at).getTime() >= thirtyDaysAgo
+).length;
+
+assert.equal(totalActiveProducts, 5, 'Total Active Products calculation (BR-INV-01)');
+assert.equal(totalActiveCategories, 3, 'Total Active Categories calculation (BR-INV-01)');
+assert.equal(totalActiveUnits, 3, 'Total Active Units calculation (BR-INV-01)');
+assert.equal(priceChangesLast30Days, 2, '30-Day Price changes filter excludes older entries (BR-INV-01)');
+
+// BR-INV-02: Category Distribution Calculation
+function computeCategoryDistribution(products, categories) {
+  const total = products.length;
+  return categories.map((cat) => {
+    const count = products.filter((p) => p.category_id === cat.id).length;
+    const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+    return { id: cat.id, name: cat.name, count, percentage };
+  }).sort((a, b) => b.count - a.count);
+}
+
+const catDist = computeCategoryDistribution(sampleProducts, sampleCategories);
+assert.equal(catDist[0].name, 'Plastik Kemasan');
+assert.equal(catDist[0].count, 3);
+assert.equal(catDist[0].percentage, 60, 'Category percentage rounded accurately (BR-INV-02)');
+assert.equal(catDist[1].name, 'Perlengkapan & Cup');
+assert.equal(catDist[1].count, 2);
+assert.equal(catDist[1].percentage, 40);
+
+// BR-INV-03: Top Stock Ranking (Descending)
+const topStock = [...sampleProducts].sort((a, b) => b.stock - a.stock).slice(0, 5);
+assert.equal(topStock[0].name, 'Plastik HD 15x30');
+assert.equal(topStock[0].stock, 1250);
+assert.equal(topStock[1].name, 'Plastik 6x10');
+assert.equal(topStock[1].stock, 980);
+
+// BR-INV-04: Low Stock Ranking (Ascending)
+const lowStock = [...sampleProducts].sort((a, b) => a.stock - b.stock).slice(0, 5);
+assert.equal(lowStock[0].name, 'Cup 12 oz');
+assert.equal(lowStock[0].stock, 0, 'Zero stock ranked first in low stock (BR-INV-04)');
+assert.equal(lowStock[1].name, 'Tali Rafia Roll');
+assert.equal(lowStock[1].stock, 5);
+
+// BR-INV-05: Unit Distribution (Counts Products, NOT physical cross-unit sum)
+function computeUnitDistribution(products, units) {
+  const total = products.length;
+  return units.map((u) => {
+    const count = products.filter((p) => p.unit_id === u.id).length;
+    const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+    return { id: u.id, name: u.name, count, percentage };
+  }).sort((a, b) => b.count - a.count);
+}
+
+const unitDist = computeUnitDistribution(sampleProducts, sampleUnits);
+assert.equal(unitDist[0].name, 'PACK');
+assert.equal(unitDist[0].count, 3, 'Counts products using PACK (BR-INV-05)');
+assert.equal(unitDist[0].percentage, 60);
+
+// BR-INV-06: Price Change Percentage Calculation
+function computePriceDiffPercentage(oldP, newP) {
+  if (!oldP || oldP <= 0) return '0.0';
+  return (((newP - oldP) / oldP) * 100).toFixed(1);
+}
+
+assert.equal(computePriceDiffPercentage(12000, 14000), '16.7', '12k -> 14k is +16.7% increase (BR-INV-06)');
+assert.equal(computePriceDiffPercentage(15000, 13500), '-10.0', '15k -> 13.5k is -10.0% decrease (BR-INV-06)');
+assert.equal(computePriceDiffPercentage(8000, 8000), '0.0', 'No change is 0.0%');
+
+console.log('✅ ALL ADMIN, USER, AUTH & INVENTORY ANALYTICS RULES (BR-A01..28, BR-U01..20, BR-AUTH-01..06, BR-INV-01..06) PASSED 100%!');
+
 
