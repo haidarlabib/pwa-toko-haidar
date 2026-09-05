@@ -3,6 +3,7 @@ import { getProducts, getCategories, getPriceHistory } from '../../../lib/db';
 import type { Product, Category, PriceHistory } from '../../../types/database.types';
 import { formatRupiah } from '../../../utils/currency';
 import { getPriceChangeVisuals, OLD_PRICE_CLASS } from '../../../utils/priceColor';
+import { CategoryFilterPopover } from '../../../components/common/CategoryFilterPopover';
 import { ProductDetailModal } from '../../barang/components/ProductDetailModal';
 import {
   Search,
@@ -44,6 +45,17 @@ export const UserBarangPage: React.FC = () => {
     loadCatalog();
   }, []);
 
+  // Category product counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      if (p.category_id) {
+        counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [products]);
+
   // Map product id to its latest price history record (for price change diff)
   const latestPriceMap = useMemo(() => {
     const map = new Map<string, PriceHistory>();
@@ -75,34 +87,26 @@ export const UserBarangPage: React.FC = () => {
   return (
     <div className="space-y-5 pb-6 font-sans">
       {/* Page Header */}
-      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-        <div>
-          <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
-            Katalog Produk
-          </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
-            Daftar Barang & Harga
-          </h1>
-          <p className="text-xs text-[#75726B]">
-            Informasi harga jual resmi dan stok katalog barang toko
-          </p>
-        </div>
+      <div className="pb-3 border-b border-[#EAE8E2] flex items-center justify-between gap-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight">
+          Daftar Barang & Harga
+        </h1>
         <div className="text-xs font-mono text-[#75726B]">
           Total: <strong>{products.length}</strong> barang
         </div>
       </div>
 
-      {/* Search & Category Filter */}
-      <div className="bg-white rounded-xl border border-[#E5E2DA] p-3.5 shadow-2xs space-y-3">
+      {/* Search & Category Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         {/* Search input */}
-        <div className="relative">
+        <div className="relative flex-1">
           <Search className="w-4 h-4 text-[#85827B] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama barang atau kategori..."
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
+            placeholder="Cari nama barang..."
+            className="w-full h-9 pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
           />
           {search && (
             <button
@@ -114,32 +118,14 @@ export const UserBarangPage: React.FC = () => {
           )}
         </div>
 
-        {/* Category horizontal pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              selectedCategory === 'all'
-                ? 'bg-[#121214] text-white shadow-2xs'
-                : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
-            }`}
-          >
-            Semua ({products.length})
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedCategory(c.id)}
-              className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                selectedCategory === c.id
-                  ? 'bg-[#121214] text-white shadow-2xs'
-                  : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
+        {/* Category Filter Popover */}
+        <CategoryFilterPopover
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          totalCount={products.length}
+          categoryCounts={categoryCounts}
+        />
       </div>
 
       {/* Product List */}

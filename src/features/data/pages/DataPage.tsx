@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '../../../components/common/Button';
+import { CategoryFilterPopover } from '../../../components/common/CategoryFilterPopover';
 import { ProductDataTable } from '../components/ProductDataTable';
 import { AddProductModal } from '../components/AddProductModal';
 import { EditProductModal } from '../components/EditProductModal';
@@ -11,22 +12,16 @@ import {
   getProducts,
   getCategories,
   getUnits,
-  updateProductInspectionSchedule,
 } from '../../../lib/db';
-import { INDONESIAN_DAYS } from '../../../lib/db';
-import type { Product, Category, Unit, DayOfWeek } from '../../../types/database.types';
-import { useAppStore } from '../../../stores/appStore';
+import type { Product, Category, Unit } from '../../../types/database.types';
 import {
   Plus,
   Search,
   X,
-  Calendar,
-  Check,
 } from 'lucide-react';
 
 export const DataPage: React.FC = () => {
-  const { showToast } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'barang' | 'kategori' | 'satuan' | 'jadwal'>('barang');
+  const [activeTab, setActiveTab] = useState<'barang' | 'kategori' | 'satuan'>('barang');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -69,6 +64,16 @@ export const DataPage: React.FC = () => {
     loadData();
   }, []);
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      if (p.category_id) {
+        counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       if (search.trim()) {
@@ -83,41 +88,13 @@ export const DataPage: React.FC = () => {
     });
   }, [products, search, selectedCategory]);
 
-  const handleToggleScheduleDay = async (product: Product, day: DayOfWeek) => {
-    const currentDays = product.inspection_days || [];
-    let updatedDays: DayOfWeek[];
-    if (currentDays.includes(day)) {
-      updatedDays = currentDays.filter((d) => d !== day);
-    } else {
-      updatedDays = [...currentDays, day];
-    }
-
-    try {
-      await updateProductInspectionSchedule(product.id, updatedDays);
-      setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, inspection_days: updatedDays } : p))
-      );
-      showToast(`Jadwal "${product.name}" diperbarui`);
-    } catch (err: any) {
-      showToast(err.message || 'Gagal memperbarui jadwal', 'error');
-    }
-  };
-
   return (
     <div className="space-y-6 pb-8 font-sans">
       {/* Page Header */}
-      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-        <div>
-          <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
-            Pusat Pengelolaan Master
-          </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
-            Manajemen Data & Harga
-          </h1>
-          <p className="text-xs text-[#75726B]">
-            Kelola barang, kategori, satuan, jadwal pemeriksaan fisik, dan pembaruan harga resmi
-          </p>
-        </div>
+      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight">
+          Manajemen Data & Harga
+        </h1>
 
         {/* Primary Action Button based on tab */}
         {activeTab === 'barang' && (
@@ -134,10 +111,11 @@ export const DataPage: React.FC = () => {
       </div>
 
       {/* Segmented Tabs Control */}
-      <div className="flex p-1 bg-[#F5F4EE] rounded-lg border border-[#E5E2DA] max-w-xl text-xs font-semibold">
+      <div className="flex p-1 bg-[#F5F4EE] rounded-lg border border-[#E5E2DA] max-w-md text-xs font-semibold">
         <button
+          type="button"
           onClick={() => setActiveTab('barang')}
-          className={`flex-1 py-1.5 rounded-md transition-all ${
+          className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer ${
             activeTab === 'barang'
               ? 'bg-white text-[#121214] shadow-2xs font-bold'
               : 'text-[#75726B] hover:text-[#121214]'
@@ -146,8 +124,9 @@ export const DataPage: React.FC = () => {
           Barang ({products.length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('kategori')}
-          className={`flex-1 py-1.5 rounded-md transition-all ${
+          className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer ${
             activeTab === 'kategori'
               ? 'bg-white text-[#121214] shadow-2xs font-bold'
               : 'text-[#75726B] hover:text-[#121214]'
@@ -156,8 +135,9 @@ export const DataPage: React.FC = () => {
           Kategori ({categories.length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('satuan')}
-          className={`flex-1 py-1.5 rounded-md transition-all ${
+          className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer ${
             activeTab === 'satuan'
               ? 'bg-white text-[#121214] shadow-2xs font-bold'
               : 'text-[#75726B] hover:text-[#121214]'
@@ -165,68 +145,40 @@ export const DataPage: React.FC = () => {
         >
           Satuan ({units.length})
         </button>
-        <button
-          onClick={() => setActiveTab('jadwal')}
-          className={`flex-1 py-1.5 rounded-md transition-all ${
-            activeTab === 'jadwal'
-              ? 'bg-white text-[#121214] shadow-2xs font-bold'
-              : 'text-[#75726B] hover:text-[#121214]'
-          }`}
-        >
-          Jadwal Periksa
-        </button>
       </div>
 
       {/* TAB 1: BARANG MANAGEMENT */}
       {activeTab === 'barang' && (
         <div className="space-y-4">
-          {/* Search & Category Filter */}
-          <div className="bg-white rounded-xl border border-[#E5E2DA] p-3.5 shadow-xs space-y-3">
-            <div className="relative">
+          {/* Search & Category Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative flex-1">
               <Search className="w-4 h-4 text-[#85827B] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari barang untuk diedit atau diupdate harga..."
-                className="w-full pl-9 pr-8 py-2 text-xs rounded-md border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all"
+                className="w-full h-9 pl-9 pr-8 py-2 text-xs rounded-lg border border-[#D5D2C9] bg-[#FAF9F5] text-[#121214] focus:bg-white focus:border-[#121214] focus:ring-1 focus:ring-[#121214] transition-all outline-none"
               />
               {search && (
                 <button
+                  type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214]"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#85827B] hover:text-[#121214] cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            {/* Category horizontal pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-              <button
-                onClick={() => setSelectedCategory('all')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === 'all'
-                    ? 'bg-[#121214] text-white shadow-2xs'
-                    : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
-                }`}
-              >
-                Semua ({products.length})
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCategory(c.id)}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
-                    selectedCategory === c.id
-                      ? 'bg-[#121214] text-white shadow-2xs'
-                      : 'bg-[#F5F4EE] text-[#605D57] hover:bg-[#EAE8E2]'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </div>
+            <CategoryFilterPopover
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              totalCount={products.length}
+              categoryCounts={categoryCounts}
+            />
           </div>
 
           {/* Product Data Table */}
@@ -323,68 +275,6 @@ export const DataPage: React.FC = () => {
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                     Aktif
                   </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: JADWAL PEMERIKSAAN HARIAN */}
-      {activeTab === 'jadwal' && (
-        <div className="bg-white rounded-xl border border-[#E5E2DA] p-5 shadow-xs space-y-4">
-          <div className="pb-3 border-b border-[#EAE8E2]">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#121214]" />
-              <h3 className="text-sm font-bold text-[#121214]">Pengaturan Jadwal Pemeriksaan Fisik</h3>
-            </div>
-            <p className="text-xs text-[#75726B] mt-0.5">
-              Pilih hari-hari pemeriksaan fisik barang untuk staf operasional. Perubahan tersimpan otomatis.
-            </p>
-          </div>
-
-          <div className="divide-y divide-[#EAE8E2] text-xs">
-            {products.map((product) => {
-              const activeDays = product.inspection_days || [];
-
-              return (
-                <div
-                  key={product.id}
-                  className="py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-[#FAF9F5] px-2 rounded-lg transition-colors"
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <strong className="text-sm font-bold text-[#121214] truncate">
-                        {product.name}
-                      </strong>
-                    </div>
-                    <p className="text-[11px] text-[#75726B]">
-                      {product.category?.name} · Stok: {product.stock} {product.unit?.name || product.unit?.symbol || ''}
-                    </p>
-                  </div>
-
-                  {/* Weekday Selection Pills */}
-                  <div className="flex flex-wrap items-center gap-1 shrink-0">
-                    {INDONESIAN_DAYS.map((day) => {
-                      const isSelected = activeDays.includes(day);
-
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          onClick={() => handleToggleScheduleDay(product, day)}
-                          className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${
-                            isSelected
-                              ? 'bg-[#121214] text-white shadow-2xs font-bold'
-                              : 'bg-[#F5F4EE] text-[#75726B] hover:bg-[#EAE8E2] hover:text-[#121214]'
-                          }`}
-                        >
-                          {isSelected && <Check className="w-3 h-3" />}
-                          <span>{day.slice(0, 3)}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
               );
             })}

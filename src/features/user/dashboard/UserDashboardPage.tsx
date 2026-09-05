@@ -11,7 +11,6 @@ import {
   TrendingUp,
   TrendingDown,
   ArrowRight,
-  CheckCircle2,
 } from 'lucide-react';
 
 export const UserDashboardPage: React.FC = () => {
@@ -190,52 +189,6 @@ export const UserDashboardPage: React.FC = () => {
                   </div>
                 );
               })}
-          </div>
-        )}
-      </section>
-
-      {/* 4. RIWAYAT PEMERIKSAAN SAYA HARI INI (PRD Section 28) */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between pb-1 border-b border-[#EAE8E2]">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-[#75726B] font-bold">
-            Pemeriksaan Yang Telah Disimpan ({todayChecks.length})
-          </h2>
-          <button
-            onClick={() => navigate('/user/check')}
-            className="text-xs font-semibold text-[#121214] hover:underline"
-          >
-            Buka Form Check →
-          </button>
-        </div>
-
-        {todayChecks.length === 0 ? (
-          <div className="p-4 bg-white rounded-lg border border-[#E5E2DA] text-xs text-[#75726B] text-center">
-            Belum ada barang yang diperiksa hari ini. Klik tombol di atas untuk mulai.
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-[#E5E2DA] divide-y divide-[#EAE8E2] text-xs">
-            {todayChecks.slice(0, 4).map((check) => (
-              <div key={check.id} className="p-3.5 flex items-center justify-between hover:bg-[#FAF9F5] transition-colors">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <strong className="text-[#121214]">{check.product_name}</strong>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      Terkunci
-                    </span>
-                  </div>
-                  <div className="text-[11px] font-mono text-[#605D57] mt-0.5">
-                    Stok Fisik: <strong>{check.current_stock}</strong> {check.note && <span className="italic text-[#85827B]">({check.note})</span>}
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] font-mono text-emerald-700 flex items-center justify-end gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Tersimpan</span>
-                  </span>
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </section>

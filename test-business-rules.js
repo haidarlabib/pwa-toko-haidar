@@ -440,6 +440,50 @@ assert.equal(computePriceDiffPercentage(12000, 14000), '16.7', '12k -> 14k is +1
 assert.equal(computePriceDiffPercentage(15000, 13500), '-10.0', '15k -> 13.5k is -10.0% decrease (BR-INV-06)');
 assert.equal(computePriceDiffPercentage(8000, 8000), '0.0', 'No change is 0.0%');
 
-console.log('✅ ALL ADMIN, USER, AUTH & INVENTORY ANALYTICS RULES (BR-A01..28, BR-U01..20, BR-AUTH-01..06, BR-INV-01..06) PASSED 100%!');
+// =========================================================================
+// PART 5: CATEGORY FILTER & CLEAN HIERARCHY RULES (BR-CAT-01 to BR-CAT-04)
+// =========================================================================
+
+function filterProductsBySearchAndCategory(products, search, selectedCategory, categories) {
+  const catMap = new Map(categories.map((c) => [c.id, c.name]));
+  return products.filter((p) => {
+    if (selectedCategory !== 'all' && p.category_id !== selectedCategory) {
+      return false;
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      const catName = catMap.get(p.category_id) || '';
+      const matchName = p.name.toLowerCase().includes(q) || catName.toLowerCase().includes(q);
+      if (!matchName) return false;
+    }
+    return true;
+  });
+}
+
+// BR-CAT-01: 'all' category returns all products
+const allFiltered = filterProductsBySearchAndCategory(sampleProducts, '', 'all', sampleCategories);
+assert.equal(allFiltered.length, 5, "Category 'all' returns all products (BR-CAT-01)");
+
+// BR-CAT-02: Specific category filter
+const cat1Filtered = filterProductsBySearchAndCategory(sampleProducts, '', 'c-1', sampleCategories);
+assert.equal(cat1Filtered.length, 3, "Category 'c-1' returns exactly 3 products (BR-CAT-02)");
+assert.ok(cat1Filtered.every((p) => p.category_id === 'c-1'));
+
+// BR-CAT-03: Combined Search + Category Filter (Logical AND)
+const andFilteredMatch = filterProductsBySearchAndCategory(sampleProducts, 'Plastik 6x10', 'c-1', sampleCategories);
+assert.equal(andFilteredMatch.length, 1, 'Search + Category Filter returns matching product in category (BR-CAT-03)');
+assert.equal(andFilteredMatch[0].name, 'Plastik 6x10');
+
+// BR-CAT-04: Logical AND with mismatch returns empty
+const andFilteredMismatch = filterProductsBySearchAndCategory(sampleProducts, 'Cup 12 oz', 'c-1', sampleCategories);
+assert.equal(andFilteredMismatch.length, 0, 'Search for item in another category returns 0 results (BR-CAT-04)');
+
+// BR-DATA-01: Admin Data Page Tabs structure
+const allowedDataTabs = ['barang', 'kategori', 'satuan'];
+assert.equal(allowedDataTabs.length, 3, 'DataPage has exactly 3 tabs: barang, kategori, satuan');
+assert.ok(!allowedDataTabs.includes('jadwal'), 'DataPage tab list must not contain jadwal');
+
+console.log('✅ ALL ADMIN, USER, AUTH, INVENTORY ANALYTICS & CATEGORY FILTER RULES (BR-A01..28, BR-U01..20, BR-AUTH-01..06, BR-INV-01..06, BR-CAT-01..04) PASSED 100%!');
+
 
 

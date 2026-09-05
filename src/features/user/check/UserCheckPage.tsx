@@ -9,7 +9,7 @@ import {
 } from '../../../lib/db';
 import { getScheduledProductsForToday } from '../../../lib/inspectionSchedule';
 import type { Product, StockCheck } from '../../../types/database.types';
-import { getCurrentDay, formatDate, formatDateTime, getTodayDateString, getJakartaNow } from '../../../lib/datetime';
+import { getCurrentDay, formatDateTime, getTodayDateString } from '../../../lib/datetime';
 import { Modal } from '../../../components/common/Modal';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
@@ -47,7 +47,6 @@ export const UserCheckPage: React.FC = () => {
   const [isSubmittingEditRequest, setIsSubmittingEditRequest] = useState(false);
 
   const todayDayName = getCurrentDay();
-  const formattedTodayDate = formatDate(getJakartaNow().toISOString());
 
   const loadData = async () => {
     try {
@@ -71,13 +70,12 @@ export const UserCheckPage: React.FC = () => {
     loadData();
   }, []);
 
+  // Filter scheduled products for current day
   const scheduledProducts = getScheduledProductsForToday(products);
 
   // Map product_id to today's check
   const todayCheckMap = new Map<string, StockCheck>();
-  for (const c of todayChecks) {
-    todayCheckMap.set(c.product_id, c);
-  }
+  todayChecks.forEach((c) => todayCheckMap.set(c.product_id, c));
 
   // Open inspection form for a product
   const handleOpenCheck = (product: Product) => {
@@ -160,37 +158,31 @@ export const UserCheckPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-8 font-sans">
-      {/* 1. Header with Live Dynamic Context (PRD Section 29) */}
-      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-        <div>
-          <span className="text-[10px] font-mono tracking-widest text-[#75726B] uppercase block">
-            Lembar Pemeriksaan Harian
-          </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight mt-0.5">
-            Pemeriksaan Stok Barang
-          </h1>
-          <p className="text-xs text-[#75726B]">
-            {todayDayName}, {formattedTodayDate} · {scheduledProducts.length} barang terjadwal
-          </p>
-        </div>
+      {/* 1. Header */}
+      <div className="pb-3 border-b border-[#EAE8E2] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#121214] tracking-tight">
+          Pemeriksaan Stok Barang
+        </h1>
 
         {/* Tab Navigation */}
-        <div className="flex p-1 bg-[#F5F4EE] rounded-lg border border-[#E5E2DA] self-start sm:self-auto">
+        <div className="flex p-1 bg-[#F5F4EE] rounded-lg border border-[#E5E2DA] self-start sm:self-auto text-xs font-semibold">
           <button
+            type="button"
             onClick={() => setActiveTab('today')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
               activeTab === 'today'
-                ? 'bg-white text-[#121214] shadow-2xs'
+                ? 'bg-white text-[#121214] shadow-2xs font-bold'
                 : 'text-[#75726B] hover:text-[#121214]'
             }`}
           >
             Jadwal Hari Ini ({scheduledProducts.length})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('history')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-white text-[#121214] shadow-2xs'
+                ? 'bg-white text-[#121214] shadow-2xs font-bold'
                 : 'text-[#75726B] hover:text-[#121214]'
             }`}
           >
